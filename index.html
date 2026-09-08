@@ -163,7 +163,8 @@
 
   const fbApp = initializeApp(firebaseConfig);
   const db = getDatabase(fbApp);
-const studentsRef = ref(db, "students");
+
+  const studentsRef = ref(db, "students");
   const rewardsRef = ref(db, "rewards");
   const requestsRef = ref(db, "requests");
   const settingsRef = ref(db, "settings");
@@ -238,12 +239,14 @@ const studentsRef = ref(db, "students");
       const name = document.getElementById("newRewardName").value.trim();
       const points = parseInt(document.getElementById("newRewardPoints").value || "0", 10);
       const desc = document.getElementById("newRewardDesc").value.trim();
+      const image = document.getElementById("newRewardImage").value.trim();
       if (!name) return alert("Bitte einen Namen eingeben.");
       const newRef = push(rewardsRef);
-      set(newRef, { name, points, description: desc });
+      set(newRef, { name, points, description: desc, image });
       document.getElementById("newRewardName").value = "";
       document.getElementById("newRewardPoints").value = "0";
       document.getElementById("newRewardDesc").value = "";
+      document.getElementById("newRewardImage").value = "";
     },
     deleteReward(id) {
       if (confirm("Diese Belohnung wirklich löschen?")) remove(ref(db, "rewards/" + id));
@@ -325,10 +328,15 @@ function render() {
 
   function renderTeacherDashboard() {
     const tab = state.teacherTab;
+    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
     app_.innerHTML = `
       <div class="top-bar">
         <strong>Lehrkraft-Bereich</strong>
         <button class="btn secondary" onclick="__app.goHome()">Abmelden</button>
+      </div>
+      <div class="card center">
+        <div style="font-size:32px;font-weight:800;color:var(--teal-dark)">${totalPoints}</div>
+        <div class="small">Gesamtpunkte der Klasse</div>
       </div>
       <div class="tabs">
         <div class="tab ${tab==='students'?'active':''}" onclick="__app.setTeacherTab('students')">Schüler</div>
@@ -348,8 +356,8 @@ function render() {
             <div class="small">${s.points || 0} Punkte</div>
           </div>
           <div class="btn-row">
-            <button class="btn secondary" onclick="__app.adjustPoints('${id}', -5)">-5</button>
-            <button class="btn secondary" onclick="__app.adjustPoints('${id}', 5)">+5</button>
+            <button class="btn secondary" onclick="__app.adjustPoints('${id}', -1)">-1</button>
+            <button class="btn secondary" onclick="__app.adjustPoints('${id}', 1)">+1</button>
             <button class="btn danger" onclick="__app.deleteStudent('${id}')">🗑</button>
           </div>
         </div>`).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
@@ -372,6 +380,7 @@ function render() {
     if (tab === "rewards") {
       const rows = Object.entries(rewards).map(([id, r]) => `
         <div class="reward-card">
+          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Pkt.</span>
@@ -393,6 +402,8 @@ function render() {
           <input id="newRewardPoints" type="number" value="10" />
           <label>Beschreibung</label>
           <textarea id="newRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
+          <label>Bild-Link (URL)</label>
+          <input id="newRewardImage" placeholder="https://..." />
           <button class="btn" onclick="__app.addReward()">Hinzufügen</button>
         </div>`;
     }
@@ -464,6 +475,7 @@ function render() {
     const content = document.getElementById("studentContent");
 
     if (tab === "points") {
+      const classTotal = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
       const myRequests = Object.entries(requests)
         .filter(([_, r]) => r.studentId === state.studentId)
         .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
@@ -478,6 +490,10 @@ function render() {
           <div style="font-size:40px;font-weight:800;color:var(--teal-dark)">${student.points || 0}</div>
           <div class="small">aktuelle Punkte</div>
         </div>
+        <div class="card center">
+          <div style="font-size:24px;font-weight:800;color:var(--teal-dark)">${classTotal}</div>
+          <div class="small">Gesamtpunkte der ganzen Klasse</div>
+        </div>
         <div class="card">
           <h3>Meine Einlöse-Anfragen</h3>
           ${reqRows}
@@ -489,6 +505,7 @@ function render() {
         const enough = (student.points || 0) >= (r.points || 0);
         return `
         <div class="reward-card">
+          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Pkt.</span>
