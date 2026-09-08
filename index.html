@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Klassen-Belohnungen</title>
+<style>
+  :root {
+    --teal: #0f9c95;
+    --teal-dark: #0b7a75;
+    --bg: #f4faf9;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --danger: #e05555;
+    --warn: #e0a83d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--teal);
+    color: white;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .btn {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn:hover { background: var(--teal-dark); }
+  .btn.secondary { background: #e5e7eb; color: var(--text); }
+  .btn.danger { background: var(--danger); }
+  .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    font-size: 15px;
+  }
+  label { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: #e6f4f3;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--teal-dark);
+    font-size: 14px;
+  }
+  .tab.active { background: var(--teal); color: white; }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .pill {
+    background: #e6f4f3;
+    color: var(--teal-dark);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .reward-card {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .reward-title { font-weight: 700; font-size: 16px; }
+  .reward-desc { color: var(--muted); font-size: 14px; margin: 6px 0; }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .small { font-size: 13px; color: var(--muted); }
+  .center { text-align: center; }
+  .status-pending { color: var(--warn); font-weight: 600; }
+  .status-approved { color: var(--teal-dark); font-weight: 600; }
+  .status-rejected { color: var(--danger); font-weight: 600; }
+  .setup-warning {
+    background: #fff4e5;
+    border: 1px solid #f0c36d;
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+<header>🏆 Klassen-Belohnungen</header>
+<div id="app"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getDatabase, ref, onValue, push, set, update, remove
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDEM-eZ0w6LE7hLfA2tIWEd87o7iYaELI",
+    authDomain: "class-rewards-95f42.firebaseapp.com",
+    databaseURL: "https://class-rewards-95f42-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "class-rewards-95f42",
+  };
+
+  const app_ = document.getElementById("app");
+
+  const isConfigured = !Object.values(firebaseConfig).some(v => String(v).includes("YOUR_"));
+
+  if (!isConfigured) {
+    app_.innerHTML = `
+      <div class="setup-warning">
+        <strong>Lasst uns noch ein kleines Setup erledigen</strong>
+        <p class="small">Trage oben im Code deine echten Firebase-Konfigurationsdaten
+        (apiKey, authDomain, databaseURL, projectId) anstelle der YOUR_...-Platzhalter ein.</p>
+      </div>`;
+    throw new Error("Firebase config not set");
+  }
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getDatabase(fbApp);
+const studentsRef = ref(db, "students");
+  const rewardsRef = ref(db, "rewards");
+  const requestsRef = ref(db, "requests");
+  const settingsRef = ref(db, "settings");
+
+  let students = {};
+  let rewards = {};
+  let requests = {};
+  let settings = { teacherPassword: "changeme" };
+
+  let state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" };
+
+  onValue(studentsRef, snap => { students = snap.val() || {}; render(); });
+  onValue(rewardsRef, snap => { rewards = snap.val() || {}; render(); });
+  onValue(requestsRef, snap => { requests = snap.val() || {}; render(); });
+  onValue(settingsRef, snap => {
+    const val = snap.val();
+    if (val) settings = val;
+    else set(settingsRef, settings);
+    render();
+  });
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s ?? "";
+    return d.innerHTML;
+  }
+
+  function initials(name) {
+    return (name || "").split(" ").map(p => p[0]).join("").slice(0,2).toUpperCase();
+  }
+
+  function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" }; render(); }
+
+  window.__app = {
+    chooseRole(role) {
+      state.role = role;
+      render();
+    },
+    goHome,
+    teacherLogin(pwInputId) {
+      const val = document.getElementById(pwInputId).value;
+      if (val === (settings.teacherPassword || "changeme")) {
+        state.role = "teacher-in";
+        render();
+      } else {
+        alert("Falsches Passwort.");
+      }
+    },
+    setTeacherTab(tab) { state.teacherTab = tab; render(); },
+    setStudentTab(tab) { state.studentTab = tab; render(); },
+    selectStudent(id) { state.studentId = id; state.role = "student-in"; render(); },
+
+    addStudent() {
+      const name = document.getElementById("newStudentName").value.trim();
+      const points = parseInt(document.getElementById("newStudentPoints").value || "0", 10);
+      if (!name) return alert("Bitte einen Namen eingeben.");
+      const newRef = push(studentsRef);
+      set(newRef, { name, points });
+      document.getElementById("newStudentName").value = "";
+      document.getElementById("newStudentPoints").value = "0";
+    },
+    adjustPoints(id, delta) {
+      const s = students[id];
+      if (!s) return;
+      update(ref(db, "students/" + id), { points: (s.points || 0) + delta });
+    },
+    deleteStudent(id) {
+      if (confirm("Diesen Schüler wirklich löschen?")) remove(ref(db, "students/" + id));
+    },
+
+    addReward() {
+      const name = document.getElementById("newRewardName").value.trim();
+      const points = parseInt(document.getElementById("newRewardPoints").value || "0", 10);
+      const desc = document.getElementById("newRewardDesc").value.trim();
+      if (!name) return alert("Bitte einen Namen eingeben.");
+      const newRef = push(rewardsRef);
+      set(newRef, { name, points, description: desc });
+      document.getElementById("newRewardName").value = "";
+      document.getElementById("newRewardPoints").value = "0";
+      document.getElementById("newRewardDesc").value = "";
+    },
+    deleteReward(id) {
+      if (confirm("Diese Belohnung wirklich löschen?")) remove(ref(db, "rewards/" + id));
+    },
+
+    requestReward(studentId, rewardId) {
+      const student = students[studentId];
+      const reward = rewards[rewardId];
+      if (!student || !reward) return;
+      if ((student.points || 0) < (reward.points || 0)) {
+        return alert("Nicht genug Punkte für diese Belohnung.");
+      }
+      const newRef = push(requestsRef);
+      set(newRef, {
+        studentId, studentName: student.name,
+        rewardId, rewardName: reward.name, cost: reward.points,
+        status: "pending", timestamp: Date.now()
+      });
+      alert("Anfrage gesendet! Die Lehrkraft muss sie noch bestätigen.");
+    },
+    approveRequest(id) {
+      const r = requests[id];
+      if (!r) return;
+      const student = students[r.studentId];
+      if (student) {
+        update(ref(db, "students/" + r.studentId), { points: (student.points || 0) - r.cost });
+      }
+      update(ref(db, "requests/" + id), { status: "approved" });
+    },
+    rejectRequest(id) {
+      update(ref(db, "requests/" + id), { status: "rejected" });
+    },
+
+    changePassword() {
+      const val = document.getElementById("newPassword").value.trim();
+      if (!val) return alert("Bitte ein neues Passwort eingeben.");
+      update(settingsRef, { teacherPassword: val });
+      alert("Passwort geändert.");
+      document.getElementById("newPassword").value = "";
+    },
+    resetAll() {
+      if (!confirm("Wirklich ALLE Schüler, Belohnungen und Anfragen löschen? Das kann nicht rückgängig gemacht werden.")) return;
+      if (!confirm("Bist du dir wirklich sicher? Letzte Bestätigung.")) return;
+      set(studentsRef, null);
+      set(rewardsRef, null);
+      set(requestsRef, null);
+      alert("Klassendaten wurden zurückgesetzt.");
+    }
+  };
+function render() {
+    if (!state.role) return renderRoleSelect();
+    if (state.role === "teacher-login") return renderTeacherLogin();
+    if (state.role === "teacher-in") return renderTeacherDashboard();
+    if (state.role === "student-select") return renderStudentSelect();
+    if (state.role === "student-in") return renderStudentDashboard();
+  }
+
+  function renderRoleSelect() {
+    app_.innerHTML = `
+      <div class="card center">
+        <p>Wer bist du?</p>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" onclick="__app.chooseRole('teacher-login')">👩‍🏫 Ich bin Lehrkraft</button>
+          <button class="btn secondary" onclick="__app.chooseRole('student-select')">🧒 Ich bin Schüler/in</button>
+        </div>
+      </div>`;
+  }
+
+  function renderTeacherLogin() {
+    app_.innerHTML = `
+      <div class="card">
+        <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">← Zurück</button></div>
+        <label>Lehrkraft-Passwort</label>
+        <input type="password" id="teacherPw" placeholder="Passwort eingeben" />
+        <button class="btn" onclick="__app.teacherLogin('teacherPw')">Anmelden</button>
+        <p class="small">Standard-Passwort beim ersten Start: changeme</p>
+      </div>`;
+  }
+
+  function renderTeacherDashboard() {
+    const tab = state.teacherTab;
+    app_.innerHTML = `
+      <div class="top-bar">
+        <strong>Lehrkraft-Bereich</strong>
+        <button class="btn secondary" onclick="__app.goHome()">Abmelden</button>
+      </div>
+      <div class="tabs">
+        <div class="tab ${tab==='students'?'active':''}" onclick="__app.setTeacherTab('students')">Schüler</div>
+        <div class="tab ${tab==='rewards'?'active':''}" onclick="__app.setTeacherTab('rewards')">Belohnungen</div>
+        <div class="tab ${tab==='requests'?'active':''}" onclick="__app.setTeacherTab('requests')">Anfragen</div>
+        <div class="tab ${tab==='settings'?'active':''}" onclick="__app.setTeacherTab('settings')">Einstellungen</div>
+      </div>
+      <div id="teacherContent"></div>
+    `;
+    const content = document.getElementById("teacherContent");
+
+    if (tab === "students") {
+      const rows = Object.entries(students).map(([id, s]) => `
+        <div class="list-item">
+          <div>
+            <div><strong>${esc(s.name)}</strong></div>
+            <div class="small">${s.points || 0} Punkte</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn secondary" onclick="__app.adjustPoints('${id}', -5)">-5</button>
+            <button class="btn secondary" onclick="__app.adjustPoints('${id}', 5)">+5</button>
+            <button class="btn danger" onclick="__app.deleteStudent('${id}')">🗑</button>
+          </div>
+        </div>`).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
+
+      content.innerHTML = `
+        <div class="card">
+          <h3>Schüler:innen</h3>
+          ${rows}
+        </div>
+        <div class="card">
+          <h3>Neuen Schüler hinzufügen</h3>
+          <label>Name / Spitzname</label>
+          <input id="newStudentName" placeholder="z. B. Mia" />
+          <label>Start-Punkte</label>
+          <input id="newStudentPoints" type="number" value="0" />
+          <button class="btn" onclick="__app.addStudent()">Hinzufügen</button>
+        </div>`;
+    }
+
+    if (tab === "rewards") {
+      const rows = Object.entries(rewards).map(([id, r]) => `
+        <div class="reward-card">
+          <div class="top-bar">
+            <div class="reward-title">${esc(r.name)}</div>
+            <span class="pill">${r.points} Pkt.</span>
+          </div>
+          <div class="reward-desc">${esc(r.description || "")}</div>
+          <button class="btn danger" onclick="__app.deleteReward('${id}')">Löschen</button>
+        </div>`).join("") || `<p class="small">Noch keine Belohnungen angelegt.</p>`;
+
+      content.innerHTML = `
+        <div class="card">
+          <h3>Geschenkeladen</h3>
+          ${rows}
+        </div>
+        <div class="card">
+          <h3>Neue Belohnung hinzufügen</h3>
+          <label>Name</label>
+          <input id="newRewardName" placeholder="z. B. Stifte-Set" />
+          <label>Punktepreis</label>
+          <input id="newRewardPoints" type="number" value="10" />
+          <label>Beschreibung</label>
+          <textarea id="newRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
+          <button class="btn" onclick="__app.addReward()">Hinzufügen</button>
+        </div>`;
+    }
+
+    if (tab === "requests") {
+      const entries = Object.entries(requests).sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
+      const rows = entries.map(([id, r]) => `
+        <div class="list-item">
+          <div>
+            <div><strong>${esc(r.studentName)}</strong> möchte: ${esc(r.rewardName)} (${r.cost} Pkt.)</div>
+            <div class="small status-${r.status}">${r.status === 'pending' ? 'Offen' : r.status === 'approved' ? 'Bestätigt' : 'Abgelehnt'}</div>
+          </div>
+          ${r.status === 'pending' ? `
+            <div class="btn-row">
+              <button class="btn" onclick="__app.approveRequest('${id}')">✔</button>
+              <button class="btn danger" onclick="__app.rejectRequest('${id}')">✘</button>
+            </div>` : ``}
+        </div>`).join("") || `<p class="small">Keine Anfragen vorhanden.</p>`;
+
+      content.innerHTML = `<div class="card"><h3>Einlöse-Anfragen</h3>${rows}</div>`;
+    }
+
+    if (tab === "settings") {
+      content.innerHTML = `
+        <div class="card">
+          <h3>Passwort ändern</h3>
+          <input id="newPassword" type="password" placeholder="Neues Passwort" />
+          <button class="btn" onclick="__app.changePassword()">Passwort speichern</button>
+        </div>
+        <div class="card">
+          <h3>Klassendaten zurücksetzen</h3>
+          <p class="small">Löscht alle Schüler, Belohnungen und Anfragen unwiderruflich (z. B. für ein neues Schuljahr).</p>
+          <button class="btn danger" onclick="__app.resetAll()">Alles zurücksetzen</button>
+        </div>`;
+    }
+  }
+
+  function renderStudentSelect() {
+    const rows = Object.entries(students).map(([id, s]) => `
+      <div class="list-item" style="cursor:pointer" onclick="__app.selectStudent('${id}')">
+        <div><strong>${esc(s.name)}</strong></div>
+        <span class="pill">${s.points || 0} Pkt.</span>
+      </div>`).join("") || `<p class="small">Die Lehrkraft hat noch keine Schüler angelegt.</p>`;
+
+    app_.innerHTML = `
+      <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">← Zurück</button></div>
+      <div class="card">
+        <h3>Wer bist du?</h3>
+        ${rows}
+      </div>`;
+  }
+
+  function renderStudentDashboard() {
+    const student = students[state.studentId];
+    if (!student) { goHome(); return; }
+    const tab = state.studentTab;
+
+    app_.innerHTML = `
+      <div class="top-bar">
+        <div><strong>${esc(student.name)}</strong><div class="small">${student.points || 0} Punkte</div></div>
+        <button class="btn secondary" onclick="__app.goHome()">Abmelden</button>
+      </div>
+      <div class="tabs">
+        <div class="tab ${tab==='points'?'active':''}" onclick="__app.setStudentTab('points')">Mein Punktestand</div>
+        <div class="tab ${tab==='rewards'?'active':''}" onclick="__app.setStudentTab('rewards')">Geschenkeladen</div>
+      </div>
+      <div id="studentContent"></div>`;
+
+    const content = document.getElementById("studentContent");
+
+    if (tab === "points") {
+      const myRequests = Object.entries(requests)
+        .filter(([_, r]) => r.studentId === state.studentId)
+        .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
+      const reqRows = myRequests.map(([id, r]) => `
+        <div class="list-item">
+          <div>${esc(r.rewardName)} (${r.cost} Pkt.)</div>
+          <span class="small status-${r.status}">${r.status === 'pending' ? 'Offen' : r.status === 'approved' ? 'Bestätigt' : 'Abgelehnt'}</span>
+        </div>`).join("") || `<p class="small">Noch keine Anfragen.</p>`;
+
+      content.innerHTML = `
+        <div class="card center">
+          <div style="font-size:40px;font-weight:800;color:var(--teal-dark)">${student.points || 0}</div>
+          <div class="small">aktuelle Punkte</div>
+        </div>
+        <div class="card">
+          <h3>Meine Einlöse-Anfragen</h3>
+          ${reqRows}
+        </div>`;
+    }
+
+    if (tab === "rewards") {
+      const cards = Object.entries(rewards).map(([id, r]) => {
+        const enough = (student.points || 0) >= (r.points || 0);
+        return `
+        <div class="reward-card">
+          <div class="top-bar">
+            <div class="reward-title">${esc(r.name)}</div>
+            <span class="pill">${r.points} Pkt.</span>
+          </div>
+          <div class="reward-desc">${esc(r.description || "")}</div>
+          <button class="btn" ${enough ? "" : "disabled"} onclick="__app.requestReward('${state.studentId}', '${id}')">
+            ${enough ? "Einlösen" : "Nicht genug Punkte"}
+          </button>
+        </div>`;
+      }).join("") || `<p class="small">Noch keine Belohnungen vorhanden.</p>`;
+
+      content.innerHTML = `<div class="card"><h3>Geschenkeladen</h3>${cards}</div>`;
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>
