@@ -30,7 +30,7 @@
   .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .small-btn { font-size: 12px; padding: 6px 8px; border-radius: 8px; }
-  input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 4px; margin-bottom: 10px; font-size: 15px; }
+  input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 4px; margin-bottom: 10px; font-size: 15px; }
   label { font-size: 13px; color: var(--muted); font-weight: 600; }
   .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
   .tab { flex: 1; text-align: center; padding: 10px; background: #e6f4f3; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--teal-dark); font-size: 13px; min-width: 70px; }
@@ -39,6 +39,7 @@
   .list-item:last-child { border-bottom: none; }
   .pill { background: #e6f4f3; color: var(--teal-dark); padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
   .reward-card, .group-reward-card { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .reward-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
   .reward-title { font-weight: 700; font-size: 16px; }
   .reward-desc { color: var(--muted); font-size: 14px; margin: 6px 0; }
   .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -74,16 +75,12 @@
   import {
     getDatabase, ref, onValue, push, set, update, remove
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-  import {
-    getStorage, ref as storageRef, uploadBytes, getDownloadURL
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDDEM-eZ0w6LE7hLfA2tIWEd87o7iYaELI",
     authDomain: "class-rewards-95f42.firebaseapp.com",
     databaseURL: "https://class-rewards-95f42-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "class-rewards-95f42",
-    storageBucket: "class-rewards-95f42.appspot.com",
   };
 
   const app_ = document.getElementById("app");
@@ -100,7 +97,6 @@
 
   const fbApp = initializeApp(firebaseConfig);
   const db = getDatabase(fbApp);
-  const storage = getStorage(fbApp);
 
   const studentsRef = ref(db, "students");
   const rewardsRef = ref(db, "rewards");
@@ -109,6 +105,13 @@
   const settingsRef = ref(db, "settings");
   const classPointsRef = ref(db, "classPoints");
   const pointsLogRef = ref(db, "pointsLog");
+
+  // Icons liegen direkt hier im Code, nicht in der Datenbank
+  const ICONS = {
+    pen: "✏️", art: "🎨", pizza: "🍕", game: "🎮", movie: "🎬",
+    chair: "🪑", book: "📚", gift: "🎁", star: "⭐", trophy: "🏆",
+    candy: "🍬", ball: "⚽", drink: "🥤", medal: "🎖️", music: "🎵"
+  };
 
   const defaultCategories = {
     attendance: { label: "Anwesenheit", points: 2 },
@@ -127,7 +130,7 @@
   let classPoints = { total: 0 };
   let pointsLog = {};
 
-  let state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" };
+  let state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null };
 
   onValue(studentsRef, snap => { students = snap.val() || {}; render(); });
   onValue(rewardsRef, snap => { rewards = snap.val() || {}; render(); });
@@ -158,14 +161,18 @@
     return d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
   }
 
-  function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" }; render(); }
+  function iconOptions(selected) {
+    return Object.entries(ICONS).map(([key, emoji]) =>
+      `<option value="${key}" ${selected === key ? "selected" : ""}>${emoji} ${key}</option>`
+    ).join("");
+  }
 
-async function uploadImageFile(file, folder) {
-    if (!file) return "";
-    const path = `${folder}/${Date.now()}_${file.name}`;
-    const fileRef = storageRef(storage, path);
-    await uploadBytes(fileRef, file);
-    return await getDownloadURL(fileRef);
+  function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null }; render(); }
+
+
+async function ensureStudentPassword(studentId) {
+    const s = students[studentId];
+    return s && s.password ? true : false;
   }
 
   window.__app = {
@@ -182,7 +189,35 @@ async function uploadImageFile(file, folder) {
     },
     setTeacherTab(tab) { state.teacherTab = tab; render(); },
     setStudentTab(tab) { state.studentTab = tab; render(); },
-    selectStudent(id) { state.studentId = id; state.role = "student-in"; render(); },
+
+    selectStudent(id) {
+      state.studentId = id;
+      const s = students[id];
+      state.authStep = (s && s.password) ? "login" : "setup";
+      state.role = "student-auth";
+      render();
+    },
+
+    studentSetupPassword() {
+      const pw1 = document.getElementById("setupPw1").value.trim();
+      const pw2 = document.getElementById("setupPw2").value.trim();
+      if (!pw1 || pw1.length < 4) return alert("Bitte ein Passwort mit mindestens 4 Zeichen wählen.");
+      if (pw1 !== pw2) return alert("Die Passwörter stimmen nicht überein.");
+      update(ref(db, "students/" + state.studentId), { password: pw1 });
+      state.role = "student-in";
+      render();
+    },
+
+    studentLogin() {
+      const pw = document.getElementById("loginPw").value.trim();
+      const s = students[state.studentId];
+      if (s && s.password === pw) {
+        state.role = "student-in";
+        render();
+      } else {
+        alert("Falsches Passwort.");
+      }
+    },
 
     addStudent() {
       const name = document.getElementById("newStudentName").value.trim();
@@ -196,6 +231,11 @@ async function uploadImageFile(file, folder) {
     deleteStudent(id) {
       if (confirm("Diesen Schüler wirklich löschen?")) remove(ref(db, "students/" + id));
     },
+    resetStudentPassword(id) {
+      if (confirm("Passwort dieses Schülers wirklich zurücksetzen? Er muss danach ein neues festlegen.")) {
+        update(ref(db, "students/" + id), { password: null });
+      }
+    },
 
     awardPoints(studentId, categoryKey) {
       const s = students[studentId];
@@ -205,20 +245,14 @@ async function uploadImageFile(file, folder) {
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + amount });
       update(classPointsRef, { total: (classPoints.total || 0) + amount });
       const logRef = push(pointsLogRef);
-      set(logRef, {
-        studentId, studentName: s.name,
-        category: cat.label, amount, timestamp: Date.now()
-      });
+      set(logRef, { studentId, studentName: s.name, category: cat.label, amount, timestamp: Date.now() });
     },
     correctPoints(studentId, delta) {
       const s = students[studentId];
       if (!s) return;
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + delta });
       const logRef = push(pointsLogRef);
-      set(logRef, {
-        studentId, studentName: s.name,
-        category: "Korrektur", amount: delta, timestamp: Date.now()
-      });
+      set(logRef, { studentId, studentName: s.name, category: "Korrektur", amount: delta, timestamp: Date.now() });
     },
 
     updateCategoryValue(key, inputId) {
@@ -227,49 +261,33 @@ async function uploadImageFile(file, folder) {
       update(settingsRef, { categories: updated });
     },
 
-    async addReward() {
+    addReward() {
       const name = document.getElementById("newRewardName").value.trim();
       const points = parseInt(document.getElementById("newRewardPoints").value || "0", 10);
       const desc = document.getElementById("newRewardDesc").value.trim();
-      const fileInput = document.getElementById("newRewardImageFile");
-      const file = fileInput.files[0];
+      const icon = document.getElementById("newRewardIcon").value;
       if (!name) return alert("Bitte einen Namen eingeben.");
-      let image = "";
-      if (file) {
-        if (file.size > 4 * 1024 * 1024) return alert("Das Bild darf maximal 4 MB groß sein.");
-        image = await uploadImageFile(file, "rewards");
-      }
       const newRef = push(rewardsRef);
-      set(newRef, { name, points, description: desc, image });
+      set(newRef, { name, points, description: desc, icon });
       document.getElementById("newRewardName").value = "";
       document.getElementById("newRewardPoints").value = "0";
       document.getElementById("newRewardDesc").value = "";
-      fileInput.value = "";
-      render();
     },
     deleteReward(id) {
       if (confirm("Diese Belohnung wirklich löschen?")) remove(ref(db, "rewards/" + id));
     },
 
-    async addGroupReward() {
+    addGroupReward() {
       const name = document.getElementById("newGroupRewardName").value.trim();
       const points = parseInt(document.getElementById("newGroupRewardPoints").value || "0", 10);
       const desc = document.getElementById("newGroupRewardDesc").value.trim();
-      const fileInput = document.getElementById("newGroupRewardImageFile");
-      const file = fileInput.files[0];
+      const icon = document.getElementById("newGroupRewardIcon").value;
       if (!name) return alert("Bitte einen Namen eingeben.");
-      let image = "";
-      if (file) {
-        if (file.size > 4 * 1024 * 1024) return alert("Das Bild darf maximal 4 MB groß sein.");
-        image = await uploadImageFile(file, "groupRewards");
-      }
       const newRef = push(groupRewardsRef);
-      set(newRef, { name, points, description: desc, image });
+      set(newRef, { name, points, description: desc, icon });
       document.getElementById("newGroupRewardName").value = "";
       document.getElementById("newGroupRewardPoints").value = "0";
       document.getElementById("newGroupRewardDesc").value = "";
-      fileInput.value = "";
-      render();
     },
     deleteGroupReward(id) {
       if (confirm("Diese Klassen-Belohnung wirklich löschen?")) remove(ref(db, "groupRewards/" + id));
@@ -287,9 +305,7 @@ async function uploadImageFile(file, folder) {
       const student = students[studentId];
       const reward = rewards[rewardId];
       if (!student || !reward) return;
-      if ((student.points || 0) < (reward.points || 0)) {
-        return alert("Nicht genug Punkte für diese Belohnung.");
-      }
+      if ((student.points || 0) < (reward.points || 0)) return alert("Nicht genug Punkte für diese Belohnung.");
       const newRef = push(requestsRef);
       set(newRef, {
         studentId, studentName: student.name,
@@ -302,9 +318,7 @@ async function uploadImageFile(file, folder) {
       const r = requests[id];
       if (!r) return;
       const student = students[r.studentId];
-      if (student) {
-        update(ref(db, "students/" + r.studentId), { points: (student.points || 0) - r.cost });
-      }
+      if (student) update(ref(db, "students/" + r.studentId), { points: (student.points || 0) - r.cost });
       update(ref(db, "requests/" + id), { status: "approved" });
     },
     rejectRequest(id) {
@@ -336,6 +350,7 @@ function render() {
     if (state.role === "teacher-login") return renderTeacherLogin();
     if (state.role === "teacher-in") return renderTeacherDashboard();
     if (state.role === "student-select") return renderStudentSelect();
+    if (state.role === "student-auth") return renderStudentAuth();
     if (state.role === "student-in") return renderStudentDashboard();
   }
 
@@ -344,8 +359,8 @@ function render() {
       <div class="card center">
         <p>Wer bist du?</p>
         <div class="btn-row" style="justify-content:center;">
-          <button class="btn" onclick="__app.chooseRole('teacher-login')">👩‍🏫 Ich bin Lehrkraft</button>
-          <button class="btn secondary" onclick="__app.chooseRole('student-select')">🧒 Ich bin Schüler/in</button>
+          <button class="btn" onclick="__app.chooseRole('teacher-login')">Ich bin Lehrkraft</button>
+          <button class="btn secondary" onclick="__app.chooseRole('student-select')">Ich bin Schüler/in</button>
         </div>
       </div>`;
   }
@@ -353,7 +368,7 @@ function render() {
   function renderTeacherLogin() {
     app_.innerHTML = `
       <div class="card">
-        <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">← Zurück</button></div>
+        <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">Zurück</button></div>
         <label>Lehrkraft-Passwort</label>
         <input type="password" id="teacherPw" placeholder="Passwort eingeben" />
         <button class="btn" onclick="__app.teacherLogin('teacherPw')">Anmelden</button>
@@ -361,10 +376,48 @@ function render() {
       </div>`;
   }
 
-  function getTopThree() {
-    return Object.entries(students)
-      .sort((a, b) => (b[1].points || 0) - (a[1].points || 0))
-      .slice(0, 3);
+  function renderStudentSelect() {
+    const rows = Object.entries(students).map(([id, s]) => `
+      <div class="list-item" style="cursor:pointer" onclick="__app.selectStudent('${id}')">
+        <div><strong>${esc(s.name)}</strong></div>
+        <span class="pill">${s.points || 0} Pkt.</span>
+      </div>`).join("") || `<p class="small">Die Lehrkraft hat noch keine Schüler angelegt.</p>`;
+
+    app_.innerHTML = `
+      <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">Zurück</button></div>
+      <div class="card">
+        <h3>Wer bist du?</h3>
+        ${rows}
+      </div>`;
+  }
+
+  function renderStudentAuth() {
+    const s = students[state.studentId];
+    if (!s) { goHome(); return; }
+
+    if (state.authStep === "setup") {
+      app_.innerHTML = `
+        <div class="card">
+          <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">Zurück</button></div>
+          <h3>Willkommen, ${esc(s.name)}!</h3>
+          <p class="small">Du hast noch kein Passwort. Lege jetzt eins fest.</p>
+          <label>Neues Passwort</label>
+          <input type="password" id="setupPw1" placeholder="Mindestens 4 Zeichen" />
+          <label>Passwort wiederholen</label>
+          <input type="password" id="setupPw2" placeholder="Passwort bestätigen" />
+          <button class="btn" onclick="__app.studentSetupPassword()">Passwort festlegen</button>
+        </div>`;
+    } else {
+      app_.innerHTML = `
+        <div class="card">
+          <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">Zurück</button></div>
+          <h3>Hallo, ${esc(s.name)}!</h3>
+          <label>Dein Passwort</label>
+          <input type="password" id="loginPw" placeholder="Passwort eingeben" />
+          <button class="btn" onclick="__app.studentLogin()">Anmelden</button>
+          <p class="small">Passwort vergessen? Frag deine Lehrkraft, sie kann es zurücksetzen.</p>
+        </div>`;
+    }
   }
 
   function renderPodiumAndBars() {
@@ -376,7 +429,7 @@ function render() {
 
     const podiumHtml = top3.length ? `
       <div class="podium">
-        ${podiumOrder.map((entry, i) => {
+        ${podiumOrder.map((entry) => {
           if (!entry) return "";
           const [id, s] = entry;
           const rank = entry === top3[0] ? 1 : entry === top3[1] ? 2 : 3;
@@ -399,12 +452,7 @@ function render() {
       </div>`;
     }).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
 
-    return `
-      <div class="card">
-        <h3>Bestenliste</h3>
-        ${podiumHtml}
-        ${barsHtml}
-      </div>`;
+    return `<div class="card"><h3>Bestenliste</h3>${podiumHtml}${barsHtml}</div>`;
   }
 
   function renderTeacherDashboard() {
@@ -421,7 +469,7 @@ function render() {
       </div>
       <div class="card center">
         <div style="font-size:28px;font-weight:800;color:var(--teal-dark)">${classPoints.total || 0}</div>
-        <div class="small">Gemeinsame Klassenpunkte (für Klassenziele)</div>
+        <div class="small">Gemeinsame Klassenpunkte</div>
       </div>
       <div class="tabs">
         <div class="tab ${tab==='students'?'active':''}" onclick="__app.setTeacherTab('students')">Schüler</div>
@@ -429,8 +477,7 @@ function render() {
         <div class="tab ${tab==='requests'?'active':''}" onclick="__app.setTeacherTab('requests')">Anfragen</div>
         <div class="tab ${tab==='settings'?'active':''}" onclick="__app.setTeacherTab('settings')">Einstellungen</div>
       </div>
-      <div id="teacherContent"></div>
-    `;
+      <div id="teacherContent"></div>`;
     const content = document.getElementById("teacherContent");
 
     if (tab === "students") {
@@ -440,27 +487,24 @@ function render() {
           <div class="top-bar">
             <div>
               <strong>${esc(s.name)}</strong>
-              <div class="small">${s.points || 0} Punkte</div>
+              <div class="small">${s.points || 0} Punkte ${s.password ? "· Passwort gesetzt" : "· Kein Passwort"}</div>
             </div>
-            <button class="btn danger small-btn" onclick="__app.deleteStudent('${id}')">🗑</button>
+            <button class="btn danger small-btn" onclick="__app.deleteStudent('${id}')">Löschen</button>
           </div>
           <div class="btn-row">
             ${Object.entries(categories).map(([key, cat]) => `
-              <button class="btn secondary small-btn" onclick="__app.awardPoints('${id}', '${key}')">
-                ${esc(cat.label)} +${cat.points}
-              </button>`).join("")}
+              <button class="btn secondary small-btn" onclick="__app.awardPoints('${id}', '${key}')">${esc(cat.label)} +${cat.points}</button>`).join("")}
           </div>
           <div class="btn-row" style="margin-top:6px;">
             <button class="btn secondary small-btn" onclick="__app.correctPoints('${id}', -1)">Korrektur -1</button>
             <button class="btn secondary small-btn" onclick="__app.correctPoints('${id}', 1)">Korrektur +1</button>
+            ${s.password ? `<button class="btn secondary small-btn" onclick="__app.resetStudentPassword('${id}')">Passwort zurücksetzen</button>` : ""}
           </div>
         </div>`).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
 
       content.innerHTML = `
         ${renderPodiumAndBars()}
-        <div class="card">
-          <h3>Schüler:innen</h3>
-        </div>
+        <div class="card"><h3>Schüler:innen</h3></div>
         ${rows}
         <div class="card">
           <h3>Neuen Schüler hinzufügen</h3>
@@ -475,7 +519,7 @@ function render() {
     if (tab === "rewards") {
       const rows = Object.entries(rewards).map(([id, r]) => `
         <div class="reward-card">
-          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="reward-icon">${ICONS[r.icon] || "🎁"}</div>
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Pkt.</span>
@@ -489,7 +533,7 @@ function render() {
         const enough = (classPoints.total || 0) >= r.points;
         return `
         <div class="group-reward-card">
-          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="reward-icon">${ICONS[r.icon] || "🎉"}</div>
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Klassen-Pkt.</span>
@@ -505,10 +549,7 @@ function render() {
       }).join("") || `<p class="small">Noch keine Klassen-Belohnungen angelegt.</p>`;
 
       content.innerHTML = `
-        <div class="card">
-          <h3>Geschenkeladen (pro Schüler)</h3>
-          ${rows}
-        </div>
+        <div class="card"><h3>Geschenkeladen (pro Schüler)</h3>${rows}</div>
         <div class="card">
           <h3>Neue Belohnung hinzufügen</h3>
           <label>Name</label>
@@ -517,14 +558,11 @@ function render() {
           <input id="newRewardPoints" type="number" value="10" />
           <label>Beschreibung</label>
           <textarea id="newRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
-          <label>Foto vom Gerät auswählen</label>
-          <input id="newRewardImageFile" type="file" accept="image/*" />
+          <label>Icon auswählen</label>
+          <select id="newRewardIcon">${iconOptions("gift")}</select>
           <button class="btn" onclick="__app.addReward()">Hinzufügen</button>
         </div>
-        <div class="card">
-          <h3>🎉 Belohnungen/Aktivitäten für die ganze Klasse</h3>
-          ${groupRows}
-        </div>
+        <div class="card"><h3>Belohnungen/Aktivitäten für die ganze Klasse</h3>${groupRows}</div>
         <div class="card">
           <h3>Neue Klassen-Belohnung hinzufügen</h3>
           <label>Name</label>
@@ -533,8 +571,8 @@ function render() {
           <input id="newGroupRewardPoints" type="number" value="300" />
           <label>Beschreibung</label>
           <textarea id="newGroupRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
-          <label>Foto vom Gerät auswählen</label>
-          <input id="newGroupRewardImageFile" type="file" accept="image/*" />
+          <label>Icon auswählen</label>
+          <select id="newGroupRewardIcon">${iconOptions("movie")}</select>
           <button class="btn" onclick="__app.addGroupReward()">Hinzufügen</button>
         </div>`;
     }
@@ -550,8 +588,8 @@ function render() {
           </div>
           ${r.status === 'pending' ? `
             <div class="btn-row">
-              <button class="btn" onclick="__app.approveRequest('${id}')">✔</button>
-              <button class="btn danger" onclick="__app.rejectRequest('${id}')">✘</button>
+              <button class="btn" onclick="__app.approveRequest('${id}')">Bestätigen</button>
+              <button class="btn danger" onclick="__app.rejectRequest('${id}')">Ablehnen</button>
             </div>` : ``}
         </div>`).join("") || `<p class="small">Keine Anfragen vorhanden.</p>`;
 
@@ -570,39 +608,21 @@ function render() {
         </div>`).join("");
 
       content.innerHTML = `
+        <div class="card"><h3>Punktekategorien anpassen</h3>${catRows}</div>
         <div class="card">
-          <h3>Punktekategorien anpassen</h3>
-          ${catRows}
-        </div>
-        <div class="card">
-          <h3>Passwort ändern</h3>
+          <h3>Lehrkraft-Passwort ändern</h3>
           <input id="newPassword" type="password" placeholder="Neues Passwort" />
           <button class="btn" onclick="__app.changePassword()">Passwort speichern</button>
         </div>
         <div class="card">
           <h3>Klassendaten zurücksetzen</h3>
-          <p class="small">Löscht alle Schüler, Belohnungen, Klassenpunkte und Anfragen unwiderruflich (z. B. für ein neues Schuljahr).</p>
+          <p class="small">Löscht alle Schüler, Belohnungen, Klassenpunkte und Anfragen unwiderruflich.</p>
           <button class="btn danger" onclick="__app.resetAll()">Alles zurücksetzen</button>
         </div>`;
     }
   }
 
-function renderStudentSelect() {
-    const rows = Object.entries(students).map(([id, s]) => `
-      <div class="list-item" style="cursor:pointer" onclick="__app.selectStudent('${id}')">
-        <div><strong>${esc(s.name)}</strong></div>
-        <span class="pill">${s.points || 0} Pkt.</span>
-      </div>`).join("") || `<p class="small">Die Lehrkraft hat noch keine Schüler angelegt.</p>`;
-
-    app_.innerHTML = `
-      <div class="top-bar"><button class="btn secondary" onclick="__app.goHome()">← Zurück</button></div>
-      <div class="card">
-        <h3>Wer bist du?</h3>
-        ${rows}
-      </div>`;
-  }
-
-  function renderStudentDashboard() {
+function renderStudentDashboard() {
     const student = students[state.studentId];
     if (!student) { goHome(); return; }
     const tab = state.studentTab;
@@ -670,7 +690,7 @@ function renderStudentSelect() {
         const enough = (student.points || 0) >= (r.points || 0);
         return `
         <div class="reward-card">
-          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="reward-icon">${ICONS[r.icon] || "🎁"}</div>
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Pkt.</span>
@@ -690,7 +710,7 @@ function renderStudentSelect() {
         const pct = Math.min(100, Math.round(((classPoints.total || 0) / r.points) * 100));
         return `
         <div class="group-reward-card">
-          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="reward-icon">${ICONS[r.icon] || "🎉"}</div>
           <div class="top-bar">
             <div class="reward-title">${esc(r.name)}</div>
             <span class="pill">${r.points} Klassen-Pkt.</span>
@@ -707,7 +727,7 @@ function renderStudentSelect() {
           <div class="small">Gemeinsame Klassenpunkte</div>
         </div>
         <div class="card">
-          <h3>🎉 Ziele für die ganze Klasse</h3>
+          <h3>Ziele für die ganze Klasse</h3>
           ${groupCards}
         </div>`;
     }
