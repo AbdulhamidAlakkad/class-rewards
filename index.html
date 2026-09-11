@@ -14,120 +14,55 @@
     --muted: #6b7280;
     --danger: #e05555;
     --warn: #e0a83d;
+    --gold: #f5c542;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-  }
-  header {
-    background: var(--teal);
-    color: white;
-    padding: 16px 20px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-  }
-  #app {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 16px;
-    padding-bottom: 80px;
-  }
-  .card {
-    background: var(--card);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  .btn {
-    display: inline-block;
-    background: var(--teal);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-size: 15px;
-    cursor: pointer;
-    text-align: center;
-  }
+  body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--teal); color: white; padding: 16px 20px; text-align: center; font-size: 20px; font-weight: 600; }
+  #app { max-width: 480px; margin: 0 auto; padding: 16px; padding-bottom: 80px; }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .btn { display: inline-block; background: var(--teal); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-size: 15px; cursor: pointer; text-align: center; }
   .btn:hover { background: var(--teal-dark); }
   .btn.secondary { background: #e5e7eb; color: var(--text); }
   .btn.danger { background: var(--danger); }
   .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  input, textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    margin-top: 4px;
-    margin-bottom: 10px;
-    font-size: 15px;
-  }
+  .small-btn { font-size: 12px; padding: 6px 8px; border-radius: 8px; }
+  input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 4px; margin-bottom: 10px; font-size: 15px; }
   label { font-size: 13px; color: var(--muted); font-weight: 600; }
-  .tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    background: #e6f4f3;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--teal-dark);
-    font-size: 14px;
-  }
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab { flex: 1; text-align: center; padding: 10px; background: #e6f4f3; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--teal-dark); font-size: 13px; min-width: 70px; }
   .tab.active { background: var(--teal); color: white; }
-  .list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-  }
+  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; gap: 8px; }
   .list-item:last-child { border-bottom: none; }
-  .pill {
-    background: #e6f4f3;
-    color: var(--teal-dark);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 13px;
-  }
-  .reward-card {
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-  }
+  .pill { background: #e6f4f3; color: var(--teal-dark); padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+  .reward-card, .group-reward-card { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
   .reward-title { font-weight: 700; font-size: 16px; }
   .reward-desc { color: var(--muted); font-size: 14px; margin: 6px 0; }
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-  }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .small { font-size: 13px; color: var(--muted); }
   .center { text-align: center; }
   .status-pending { color: var(--warn); font-weight: 600; }
   .status-approved { color: var(--teal-dark); font-weight: 600; }
   .status-rejected { color: var(--danger); font-weight: 600; }
-  .setup-warning {
-    background: #fff4e5;
-    border: 1px solid #f0c36d;
-    padding: 14px;
-    border-radius: 10px;
-    margin-bottom: 14px;
-  }
+  .setup-warning { background: #fff4e5; border: 1px solid #f0c36d; padding: 14px; border-radius: 10px; margin-bottom: 14px; }
+  .podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
+  .podium-item { text-align: center; background: #f7f7f7; border-radius: 10px; padding: 10px 8px; flex: 1; }
+  .podium-1 { order: 2; background: #fff8e0; border: 2px solid var(--gold); }
+  .podium-2 { order: 1; background: #f5f5f5; border: 2px solid var(--silver); }
+  .podium-3 { order: 3; background: #fbeee0; border: 2px solid var(--bronze); }
+  .medal { font-size: 28px; }
+  .podium-name { font-weight: 700; font-size: 13px; margin-top: 4px; }
+  .podium-points { font-size: 12px; color: var(--muted); }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .bar-label { width: 80px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-container { flex: 1; background: #eee; border-radius: 8px; height: 14px; overflow: hidden; }
+  .bar-fill { background: var(--teal); height: 100%; border-radius: 8px; }
+  .bar-value { width: 40px; text-align: right; font-size: 13px; font-weight: 600; }
+  .progress-bar { background: #eee; border-radius: 8px; height: 16px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { background: var(--teal); height: 100%; border-radius: 8px; }
 </style>
 </head>
 <body>
@@ -139,49 +74,74 @@
   import {
     getDatabase, ref, onValue, push, set, update, remove
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import {
+    getStorage, ref as storageRef, uploadBytes, getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDDEM-eZ0w6LE7hLfA2tIWEd87o7iYaELI",
     authDomain: "class-rewards-95f42.firebaseapp.com",
     databaseURL: "https://class-rewards-95f42-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "class-rewards-95f42",
+    storageBucket: "class-rewards-95f42.appspot.com",
   };
 
   const app_ = document.getElementById("app");
-
   const isConfigured = !Object.values(firebaseConfig).some(v => String(v).includes("YOUR_"));
 
   if (!isConfigured) {
     app_.innerHTML = `
       <div class="setup-warning">
         <strong>Lasst uns noch ein kleines Setup erledigen</strong>
-        <p class="small">Trage oben im Code deine echten Firebase-Konfigurationsdaten
-        (apiKey, authDomain, databaseURL, projectId) anstelle der YOUR_...-Platzhalter ein.</p>
+        <p class="small">Trage oben im Code deine echten Firebase-Konfigurationsdaten ein.</p>
       </div>`;
     throw new Error("Firebase config not set");
   }
 
   const fbApp = initializeApp(firebaseConfig);
   const db = getDatabase(fbApp);
+  const storage = getStorage(fbApp);
 
   const studentsRef = ref(db, "students");
   const rewardsRef = ref(db, "rewards");
+  const groupRewardsRef = ref(db, "groupRewards");
   const requestsRef = ref(db, "requests");
   const settingsRef = ref(db, "settings");
+  const classPointsRef = ref(db, "classPoints");
+  const pointsLogRef = ref(db, "pointsLog");
+
+  const defaultCategories = {
+    attendance: { label: "Anwesenheit", points: 2 },
+    homework: { label: "Aufgaben", points: 3 },
+    participation: { label: "Mitarbeit", points: 2 },
+    study: { label: "Lernen/Aktivität", points: 3 },
+    rules: { label: "Regeln einhalten", points: 2 },
+    quran: { label: "Koran auswendig", points: 5 }
+  };
 
   let students = {};
   let rewards = {};
+  let groupRewards = {};
   let requests = {};
-  let settings = { teacherPassword: "changeme" };
+  let settings = { teacherPassword: "changeme", categories: defaultCategories };
+  let classPoints = { total: 0 };
+  let pointsLog = {};
 
   let state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" };
 
   onValue(studentsRef, snap => { students = snap.val() || {}; render(); });
   onValue(rewardsRef, snap => { rewards = snap.val() || {}; render(); });
+  onValue(groupRewardsRef, snap => { groupRewards = snap.val() || {}; render(); });
   onValue(requestsRef, snap => { requests = snap.val() || {}; render(); });
+  onValue(classPointsRef, snap => {
+    const val = snap.val();
+    if (val) classPoints = val; else set(classPointsRef, classPoints);
+    render();
+  });
+  onValue(pointsLogRef, snap => { pointsLog = snap.val() || {}; render(); });
   onValue(settingsRef, snap => {
     const val = snap.val();
-    if (val) settings = val;
+    if (val) { settings = val; if (!settings.categories) settings.categories = defaultCategories; }
     else set(settingsRef, settings);
     render();
   });
@@ -192,17 +152,24 @@
     return d.innerHTML;
   }
 
-  function initials(name) {
-    return (name || "").split(" ").map(p => p[0]).join("").slice(0,2).toUpperCase();
+  function formatDate(ts) {
+    if (!ts) return "";
+    const d = new Date(ts);
+    return d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
   }
 
   function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points" }; render(); }
 
+async function uploadImageFile(file, folder) {
+    if (!file) return "";
+    const path = `${folder}/${Date.now()}_${file.name}`;
+    const fileRef = storageRef(storage, path);
+    await uploadBytes(fileRef, file);
+    return await getDownloadURL(fileRef);
+  }
+
   window.__app = {
-    chooseRole(role) {
-      state.role = role;
-      render();
-    },
+    chooseRole(role) { state.role = role; render(); },
     goHome,
     teacherLogin(pwInputId) {
       const val = document.getElementById(pwInputId).value;
@@ -226,30 +193,94 @@
       document.getElementById("newStudentName").value = "";
       document.getElementById("newStudentPoints").value = "0";
     },
-    adjustPoints(id, delta) {
-      const s = students[id];
-      if (!s) return;
-      update(ref(db, "students/" + id), { points: (s.points || 0) + delta });
-    },
     deleteStudent(id) {
       if (confirm("Diesen Schüler wirklich löschen?")) remove(ref(db, "students/" + id));
     },
 
-    addReward() {
+    awardPoints(studentId, categoryKey) {
+      const s = students[studentId];
+      const cat = settings.categories[categoryKey];
+      if (!s || !cat) return;
+      const amount = cat.points || 0;
+      update(ref(db, "students/" + studentId), { points: (s.points || 0) + amount });
+      update(classPointsRef, { total: (classPoints.total || 0) + amount });
+      const logRef = push(pointsLogRef);
+      set(logRef, {
+        studentId, studentName: s.name,
+        category: cat.label, amount, timestamp: Date.now()
+      });
+    },
+    correctPoints(studentId, delta) {
+      const s = students[studentId];
+      if (!s) return;
+      update(ref(db, "students/" + studentId), { points: (s.points || 0) + delta });
+      const logRef = push(pointsLogRef);
+      set(logRef, {
+        studentId, studentName: s.name,
+        category: "Korrektur", amount: delta, timestamp: Date.now()
+      });
+    },
+
+    updateCategoryValue(key, inputId) {
+      const val = parseInt(document.getElementById(inputId).value || "0", 10);
+      const updated = { ...settings.categories, [key]: { ...settings.categories[key], points: val } };
+      update(settingsRef, { categories: updated });
+    },
+
+    async addReward() {
       const name = document.getElementById("newRewardName").value.trim();
       const points = parseInt(document.getElementById("newRewardPoints").value || "0", 10);
       const desc = document.getElementById("newRewardDesc").value.trim();
-      const image = document.getElementById("newRewardImage").value.trim();
+      const fileInput = document.getElementById("newRewardImageFile");
+      const file = fileInput.files[0];
       if (!name) return alert("Bitte einen Namen eingeben.");
+      let image = "";
+      if (file) {
+        if (file.size > 4 * 1024 * 1024) return alert("Das Bild darf maximal 4 MB groß sein.");
+        image = await uploadImageFile(file, "rewards");
+      }
       const newRef = push(rewardsRef);
       set(newRef, { name, points, description: desc, image });
       document.getElementById("newRewardName").value = "";
       document.getElementById("newRewardPoints").value = "0";
       document.getElementById("newRewardDesc").value = "";
-      document.getElementById("newRewardImage").value = "";
+      fileInput.value = "";
+      render();
     },
     deleteReward(id) {
       if (confirm("Diese Belohnung wirklich löschen?")) remove(ref(db, "rewards/" + id));
+    },
+
+    async addGroupReward() {
+      const name = document.getElementById("newGroupRewardName").value.trim();
+      const points = parseInt(document.getElementById("newGroupRewardPoints").value || "0", 10);
+      const desc = document.getElementById("newGroupRewardDesc").value.trim();
+      const fileInput = document.getElementById("newGroupRewardImageFile");
+      const file = fileInput.files[0];
+      if (!name) return alert("Bitte einen Namen eingeben.");
+      let image = "";
+      if (file) {
+        if (file.size > 4 * 1024 * 1024) return alert("Das Bild darf maximal 4 MB groß sein.");
+        image = await uploadImageFile(file, "groupRewards");
+      }
+      const newRef = push(groupRewardsRef);
+      set(newRef, { name, points, description: desc, image });
+      document.getElementById("newGroupRewardName").value = "";
+      document.getElementById("newGroupRewardPoints").value = "0";
+      document.getElementById("newGroupRewardDesc").value = "";
+      fileInput.value = "";
+      render();
+    },
+    deleteGroupReward(id) {
+      if (confirm("Diese Klassen-Belohnung wirklich löschen?")) remove(ref(db, "groupRewards/" + id));
+    },
+    redeemGroupReward(id) {
+      const r = groupRewards[id];
+      if (!r) return;
+      if ((classPoints.total || 0) < r.points) return alert("Die Klasse hat noch nicht genug Punkte.");
+      if (!confirm(`"${r.name}" jetzt einlösen? Es werden ${r.points} Klassenpunkte abgezogen.`)) return;
+      update(classPointsRef, { total: (classPoints.total || 0) - r.points });
+      alert("Klassen-Belohnung eingelöst!");
     },
 
     requestReward(studentId, rewardId) {
@@ -288,14 +319,18 @@
       document.getElementById("newPassword").value = "";
     },
     resetAll() {
-      if (!confirm("Wirklich ALLE Schüler, Belohnungen und Anfragen löschen? Das kann nicht rückgängig gemacht werden.")) return;
+      if (!confirm("Wirklich ALLE Schüler, Belohnungen, Klassenpunkte und Anfragen löschen? Das kann nicht rückgängig gemacht werden.")) return;
       if (!confirm("Bist du dir wirklich sicher? Letzte Bestätigung.")) return;
       set(studentsRef, null);
       set(rewardsRef, null);
+      set(groupRewardsRef, null);
       set(requestsRef, null);
+      set(pointsLogRef, null);
+      set(classPointsRef, { total: 0 });
       alert("Klassendaten wurden zurückgesetzt.");
     }
   };
+
 function render() {
     if (!state.role) return renderRoleSelect();
     if (state.role === "teacher-login") return renderTeacherLogin();
@@ -326,6 +361,52 @@ function render() {
       </div>`;
   }
 
+  function getTopThree() {
+    return Object.entries(students)
+      .sort((a, b) => (b[1].points || 0) - (a[1].points || 0))
+      .slice(0, 3);
+  }
+
+  function renderPodiumAndBars() {
+    const sorted = Object.entries(students).sort((a, b) => (b[1].points || 0) - (a[1].points || 0));
+    const top3 = sorted.slice(0, 3);
+    const maxPoints = sorted.length ? (sorted[0][1].points || 0) : 1;
+    const medals = ["🥇", "🥈", "🥉"];
+    const podiumOrder = [top3[1], top3[0], top3[2]];
+
+    const podiumHtml = top3.length ? `
+      <div class="podium">
+        ${podiumOrder.map((entry, i) => {
+          if (!entry) return "";
+          const [id, s] = entry;
+          const rank = entry === top3[0] ? 1 : entry === top3[1] ? 2 : 3;
+          return `
+          <div class="podium-item podium-${rank}">
+            <div class="medal">${medals[rank - 1]}</div>
+            <div class="podium-name">${esc(s.name)}</div>
+            <div class="podium-points">${s.points || 0} Pkt.</div>
+          </div>`;
+        }).join("")}
+      </div>` : "";
+
+    const barsHtml = sorted.map(([id, s]) => {
+      const pct = maxPoints > 0 ? Math.round(((s.points || 0) / maxPoints) * 100) : 0;
+      return `
+      <div class="bar-row">
+        <div class="bar-label">${esc(s.name)}</div>
+        <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-value">${s.points || 0}</div>
+      </div>`;
+    }).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
+
+    return `
+      <div class="card">
+        <h3>Bestenliste</h3>
+        ${podiumHtml}
+        ${barsHtml}
+      </div>`;
+  }
+
   function renderTeacherDashboard() {
     const tab = state.teacherTab;
     const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
@@ -336,7 +417,11 @@ function render() {
       </div>
       <div class="card center">
         <div style="font-size:32px;font-weight:800;color:var(--teal-dark)">${totalPoints}</div>
-        <div class="small">Gesamtpunkte der Klasse</div>
+        <div class="small">Summe aller Schülerpunkte</div>
+      </div>
+      <div class="card center">
+        <div style="font-size:28px;font-weight:800;color:var(--teal-dark)">${classPoints.total || 0}</div>
+        <div class="small">Gemeinsame Klassenpunkte (für Klassenziele)</div>
       </div>
       <div class="tabs">
         <div class="tab ${tab==='students'?'active':''}" onclick="__app.setTeacherTab('students')">Schüler</div>
@@ -349,24 +434,34 @@ function render() {
     const content = document.getElementById("teacherContent");
 
     if (tab === "students") {
+      const categories = settings.categories || defaultCategories;
       const rows = Object.entries(students).map(([id, s]) => `
-        <div class="list-item">
-          <div>
-            <div><strong>${esc(s.name)}</strong></div>
-            <div class="small">${s.points || 0} Punkte</div>
+        <div class="card">
+          <div class="top-bar">
+            <div>
+              <strong>${esc(s.name)}</strong>
+              <div class="small">${s.points || 0} Punkte</div>
+            </div>
+            <button class="btn danger small-btn" onclick="__app.deleteStudent('${id}')">🗑</button>
           </div>
           <div class="btn-row">
-            <button class="btn secondary" onclick="__app.adjustPoints('${id}', -1)">-1</button>
-            <button class="btn secondary" onclick="__app.adjustPoints('${id}', 1)">+1</button>
-            <button class="btn danger" onclick="__app.deleteStudent('${id}')">🗑</button>
+            ${Object.entries(categories).map(([key, cat]) => `
+              <button class="btn secondary small-btn" onclick="__app.awardPoints('${id}', '${key}')">
+                ${esc(cat.label)} +${cat.points}
+              </button>`).join("")}
+          </div>
+          <div class="btn-row" style="margin-top:6px;">
+            <button class="btn secondary small-btn" onclick="__app.correctPoints('${id}', -1)">Korrektur -1</button>
+            <button class="btn secondary small-btn" onclick="__app.correctPoints('${id}', 1)">Korrektur +1</button>
           </div>
         </div>`).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
 
       content.innerHTML = `
+        ${renderPodiumAndBars()}
         <div class="card">
           <h3>Schüler:innen</h3>
-          ${rows}
         </div>
+        ${rows}
         <div class="card">
           <h3>Neuen Schüler hinzufügen</h3>
           <label>Name / Spitzname</label>
@@ -389,9 +484,29 @@ function render() {
           <button class="btn danger" onclick="__app.deleteReward('${id}')">Löschen</button>
         </div>`).join("") || `<p class="small">Noch keine Belohnungen angelegt.</p>`;
 
+      const groupRows = Object.entries(groupRewards).map(([id, r]) => {
+        const pct = Math.min(100, Math.round(((classPoints.total || 0) / r.points) * 100));
+        const enough = (classPoints.total || 0) >= r.points;
+        return `
+        <div class="group-reward-card">
+          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="top-bar">
+            <div class="reward-title">${esc(r.name)}</div>
+            <span class="pill">${r.points} Klassen-Pkt.</span>
+          </div>
+          <div class="reward-desc">${esc(r.description || "")}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="small">${classPoints.total || 0} / ${r.points} Punkten (${pct}%)</div>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn" ${enough ? "" : "disabled"} onclick="__app.redeemGroupReward('${id}')">Einlösen</button>
+            <button class="btn danger" onclick="__app.deleteGroupReward('${id}')">Löschen</button>
+          </div>
+        </div>`;
+      }).join("") || `<p class="small">Noch keine Klassen-Belohnungen angelegt.</p>`;
+
       content.innerHTML = `
         <div class="card">
-          <h3>Geschenkeladen</h3>
+          <h3>Geschenkeladen (pro Schüler)</h3>
           ${rows}
         </div>
         <div class="card">
@@ -402,9 +517,25 @@ function render() {
           <input id="newRewardPoints" type="number" value="10" />
           <label>Beschreibung</label>
           <textarea id="newRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
-          <label>Bild-Link (URL)</label>
-          <input id="newRewardImage" placeholder="https://..." />
+          <label>Foto vom Gerät auswählen</label>
+          <input id="newRewardImageFile" type="file" accept="image/*" />
           <button class="btn" onclick="__app.addReward()">Hinzufügen</button>
+        </div>
+        <div class="card">
+          <h3>🎉 Belohnungen/Aktivitäten für die ganze Klasse</h3>
+          ${groupRows}
+        </div>
+        <div class="card">
+          <h3>Neue Klassen-Belohnung hinzufügen</h3>
+          <label>Name</label>
+          <input id="newGroupRewardName" placeholder="z. B. Kino-Nachmittag" />
+          <label>Benötigte Klassenpunkte</label>
+          <input id="newGroupRewardPoints" type="number" value="300" />
+          <label>Beschreibung</label>
+          <textarea id="newGroupRewardDesc" rows="2" placeholder="Kurze Beschreibung"></textarea>
+          <label>Foto vom Gerät auswählen</label>
+          <input id="newGroupRewardImageFile" type="file" accept="image/*" />
+          <button class="btn" onclick="__app.addGroupReward()">Hinzufügen</button>
         </div>`;
     }
 
@@ -415,6 +546,7 @@ function render() {
           <div>
             <div><strong>${esc(r.studentName)}</strong> möchte: ${esc(r.rewardName)} (${r.cost} Pkt.)</div>
             <div class="small status-${r.status}">${r.status === 'pending' ? 'Offen' : r.status === 'approved' ? 'Bestätigt' : 'Abgelehnt'}</div>
+            <div class="small">${formatDate(r.timestamp)}</div>
           </div>
           ${r.status === 'pending' ? `
             <div class="btn-row">
@@ -427,7 +559,21 @@ function render() {
     }
 
     if (tab === "settings") {
+      const categories = settings.categories || defaultCategories;
+      const catRows = Object.entries(categories).map(([key, cat]) => `
+        <div class="list-item">
+          <div>${esc(cat.label)}</div>
+          <div class="btn-row" style="align-items:center;">
+            <input id="cat_${key}" type="number" value="${cat.points}" style="width:70px;margin:0;" />
+            <button class="btn secondary small-btn" onclick="__app.updateCategoryValue('${key}', 'cat_${key}')">Speichern</button>
+          </div>
+        </div>`).join("");
+
       content.innerHTML = `
+        <div class="card">
+          <h3>Punktekategorien anpassen</h3>
+          ${catRows}
+        </div>
         <div class="card">
           <h3>Passwort ändern</h3>
           <input id="newPassword" type="password" placeholder="Neues Passwort" />
@@ -435,13 +581,13 @@ function render() {
         </div>
         <div class="card">
           <h3>Klassendaten zurücksetzen</h3>
-          <p class="small">Löscht alle Schüler, Belohnungen und Anfragen unwiderruflich (z. B. für ein neues Schuljahr).</p>
+          <p class="small">Löscht alle Schüler, Belohnungen, Klassenpunkte und Anfragen unwiderruflich (z. B. für ein neues Schuljahr).</p>
           <button class="btn danger" onclick="__app.resetAll()">Alles zurücksetzen</button>
         </div>`;
     }
   }
 
-  function renderStudentSelect() {
+function renderStudentSelect() {
     const rows = Object.entries(students).map(([id, s]) => `
       <div class="list-item" style="cursor:pointer" onclick="__app.selectStudent('${id}')">
         <div><strong>${esc(s.name)}</strong></div>
@@ -467,36 +613,55 @@ function render() {
         <button class="btn secondary" onclick="__app.goHome()">Abmelden</button>
       </div>
       <div class="tabs">
-        <div class="tab ${tab==='points'?'active':''}" onclick="__app.setStudentTab('points')">Mein Punktestand</div>
+        <div class="tab ${tab==='points'?'active':''}" onclick="__app.setStudentTab('points')">Punktestand</div>
+        <div class="tab ${tab==='history'?'active':''}" onclick="__app.setStudentTab('history')">Verlauf</div>
         <div class="tab ${tab==='rewards'?'active':''}" onclick="__app.setStudentTab('rewards')">Geschenkeladen</div>
+        <div class="tab ${tab==='group'?'active':''}" onclick="__app.setStudentTab('group')">Klassenziele</div>
       </div>
       <div id="studentContent"></div>`;
 
     const content = document.getElementById("studentContent");
 
     if (tab === "points") {
-      const classTotal = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
       const myRequests = Object.entries(requests)
         .filter(([_, r]) => r.studentId === state.studentId)
         .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
       const reqRows = myRequests.map(([id, r]) => `
         <div class="list-item">
-          <div>${esc(r.rewardName)} (${r.cost} Pkt.)</div>
+          <div>
+            <div>${esc(r.rewardName)} (${r.cost} Pkt.)</div>
+            <div class="small">${formatDate(r.timestamp)}</div>
+          </div>
           <span class="small status-${r.status}">${r.status === 'pending' ? 'Offen' : r.status === 'approved' ? 'Bestätigt' : 'Abgelehnt'}</span>
         </div>`).join("") || `<p class="small">Noch keine Anfragen.</p>`;
 
       content.innerHTML = `
         <div class="card center">
           <div style="font-size:40px;font-weight:800;color:var(--teal-dark)">${student.points || 0}</div>
-          <div class="small">aktuelle Punkte</div>
-        </div>
-        <div class="card center">
-          <div style="font-size:24px;font-weight:800;color:var(--teal-dark)">${classTotal}</div>
-          <div class="small">Gesamtpunkte der ganzen Klasse</div>
+          <div class="small">Meine Punkte</div>
         </div>
         <div class="card">
           <h3>Meine Einlöse-Anfragen</h3>
           ${reqRows}
+        </div>`;
+    }
+
+    if (tab === "history") {
+      const myLog = Object.entries(pointsLog)
+        .filter(([_, l]) => l.studentId === state.studentId)
+        .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
+      const logRows = myLog.map(([id, l]) => `
+        <div class="list-item">
+          <div>
+            <div><strong>${esc(l.category)}</strong> ${l.amount > 0 ? "+" : ""}${l.amount} Pkt.</div>
+            <div class="small">${formatDate(l.timestamp)}</div>
+          </div>
+        </div>`).join("") || `<p class="small">Noch keine Punkte-Historie vorhanden.</p>`;
+
+      content.innerHTML = `
+        <div class="card">
+          <h3>Woher kommen meine Punkte?</h3>
+          ${logRows}
         </div>`;
     }
 
@@ -518,6 +683,33 @@ function render() {
       }).join("") || `<p class="small">Noch keine Belohnungen vorhanden.</p>`;
 
       content.innerHTML = `<div class="card"><h3>Geschenkeladen</h3>${cards}</div>`;
+    }
+
+    if (tab === "group") {
+      const groupCards = Object.entries(groupRewards).map(([id, r]) => {
+        const pct = Math.min(100, Math.round(((classPoints.total || 0) / r.points) * 100));
+        return `
+        <div class="group-reward-card">
+          ${r.image ? `<img src="${esc(r.image)}" style="width:100%;border-radius:10px;margin-bottom:8px;object-fit:cover;max-height:160px;" />` : ""}
+          <div class="top-bar">
+            <div class="reward-title">${esc(r.name)}</div>
+            <span class="pill">${r.points} Klassen-Pkt.</span>
+          </div>
+          <div class="reward-desc">${esc(r.description || "")}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="small">${classPoints.total || 0} / ${r.points} Punkten (${pct}%)</div>
+        </div>`;
+      }).join("") || `<p class="small">Noch keine Klassenziele vorhanden.</p>`;
+
+      content.innerHTML = `
+        <div class="card center">
+          <div style="font-size:28px;font-weight:800;color:var(--teal-dark)">${classPoints.total || 0}</div>
+          <div class="small">Gemeinsame Klassenpunkte</div>
+        </div>
+        <div class="card">
+          <h3>🎉 Ziele für die ganze Klasse</h3>
+          ${groupCards}
+        </div>`;
     }
   }
 
