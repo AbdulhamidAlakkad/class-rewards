@@ -140,7 +140,7 @@
   let rewards = {};
   let groupRewards = {};
   let requests = {};
-  let settings = { teacherPassword: "changeme", categories: defaultCategories, totalPointsOffset: 0 };
+  let settings = { teacherPassword: "changeme", categories: defaultCategories, totalPointsOverride: null };
   let classPoints = { total: 0 };
   let pointsLog = {};
 
@@ -161,7 +161,7 @@
     if (val) {
       settings = val;
       if (!settings.categories) settings.categories = defaultCategories;
-      if (settings.totalPointsOffset === undefined) settings.totalPointsOffset = 0;
+      if (settings.totalPointsOverride === undefined) settings.totalPointsOverride = null;
     } else {
       set(settingsRef, settings);
     }
@@ -184,6 +184,13 @@
     return Object.entries(ICONS).map(([key, emoji]) =>
       `<option value="${key}" ${selected === key ? "selected" : ""}>${emoji} ${key}</option>`
     ).join("");
+  }
+
+  function getTotalPoints() {
+    if (settings.totalPointsOverride !== null && settings.totalPointsOverride !== undefined) {
+      return settings.totalPointsOverride;
+    }
+    return Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
   }
 
   function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null }; render(); }
@@ -347,15 +354,12 @@ window.__app = {
       document.getElementById("newPassword").value = "";
     },
 
-    setClassPointsManually(inputId) {
-      const val = parseInt(document.getElementById(inputId).value || "0", 10);
-      update(classPointsRef, { total: val });
-      alert("Klassenpunkte wurden angepasst.");
-    },
-    setTotalPointsOffset(inputId) {
-      const val = parseInt(document.getElementById(inputId).value || "0", 10);
-      update(settingsRef, { totalPointsOffset: val });
-      alert("Korrekturwert für Gesamtpunkte wurde gespeichert.");
+    savePointsManually() {
+      const totalVal = parseInt(document.getElementById("manualTotalPoints").value || "0", 10);
+      const classVal = parseInt(document.getElementById("manualClassPoints").value || "0", 10);
+      update(settingsRef, { totalPointsOverride: totalVal });
+      update(classPointsRef, { total: classVal });
+      alert("Punktestände wurden gespeichert.");
     },
 
     resetAll() {
@@ -367,11 +371,12 @@ window.__app = {
       set(requestsRef, null);
       set(pointsLogRef, null);
       set(classPointsRef, { total: 0 });
+      update(settingsRef, { totalPointsOverride: null });
       alert("Klassendaten wurden zurückgesetzt.");
     }
   };
 
-function renderPodiumAndBars() {
+  function renderPodiumAndBars() {
     const sorted = Object.entries(students).sort((a, b) => (b[1].points || 0) - (a[1].points || 0));
     const top3 = sorted.slice(0, 3);
     const maxPoints = sorted.length ? (sorted[0][1].points || 0) : 1;
@@ -416,7 +421,7 @@ function renderPodiumAndBars() {
   }
 
   function renderRoleSelect() {
-    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0) + (settings.totalPointsOffset || 0);
+    const totalPoints = getTotalPoints();
     const studentCount = Object.keys(students).length;
 
     const groupGoalsHtml = Object.entries(groupRewards).map(([id, r]) => {
@@ -528,7 +533,7 @@ function renderPodiumAndBars() {
 
 function renderTeacherDashboard() {
     const tab = state.teacherTab;
-    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0) + (settings.totalPointsOffset || 0);
+    const totalPoints = getTotalPoints();
     app_.innerHTML = `
       <div class="top-bar">
         <strong>Lehrkraft-Bereich</strong>
@@ -682,13 +687,11 @@ function renderTeacherDashboard() {
         <div class="card"><h3>Punktekategorien anpassen</h3>${catRows}</div>
         <div class="card">
           <h3>Punktestände manuell anpassen</h3>
-          <label>Klassenpunkte (aktuell: ${classPoints.total || 0})</label>
+          <label>Summe aller Schülerpunkte</label>
+          <input id="manualTotalPoints" type="number" value="${totalPoints}" />
+          <label>Gemeinsame Klassenpunkte</label>
           <input id="manualClassPoints" type="number" value="${classPoints.total || 0}" />
-          <button class="btn secondary" onclick="__app.setClassPointsManually('manualClassPoints')">Klassenpunkte speichern</button>
-          <label style="margin-top:10px;display:block;">Korrekturwert für "Punkte gesamt" (aktuell: ${settings.totalPointsOffset || 0})</label>
-          <input id="manualTotalOffset" type="number" value="${settings.totalPointsOffset || 0}" />
-          <button class="btn secondary" onclick="__app.setTotalPointsOffset('manualTotalOffset')">Korrekturwert speichern</button>
-          <p class="small">Der Korrekturwert wird zur Summe aller Schülerpunkte addiert, falls diese Anzeige mal manuell angepasst werden muss.</p>
+          <button class="btn" onclick="__app.savePointsManually()">Beide Werte speichern</button>
         </div>
         <div class="card">
           <h3>Lehrkraft-Passwort ändern</h3>
@@ -818,4 +821,3 @@ function renderStudentDashboard() {
 </script>
 </body>
 </html>
-
