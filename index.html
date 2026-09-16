@@ -120,6 +120,7 @@
   const settingsRef = ref(db, "settings");
   const classPointsRef = ref(db, "classPoints");
   const pointsLogRef = ref(db, "pointsLog");
+  const totalStudentPointsRef = ref(db, "totalStudentPoints");
 
   const ICONS = {
     pen: "✏️", art: "🎨", pizza: "🍕", game: "🎮", movie: "🎬",
@@ -140,13 +141,21 @@
   let rewards = {};
   let groupRewards = {};
   let requests = {};
-  let settings = { teacherPassword: "changeme", categories: defaultCategories, totalPointsOverride: null };
+  let settings = { teacherPassword: "changeme", categories: defaultCategories };
   let classPoints = { total: 0 };
+  let totalStudentPoints = { total: 0 };
   let pointsLog = {};
+  let totalStudentPointsLoaded = false;
+  let studentsLoaded = false;
 
   let state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null };
 
-  onValue(studentsRef, snap => { students = snap.val() || {}; render(); });
+  onValue(studentsRef, snap => {
+    students = snap.val() || {};
+    studentsLoaded = true;
+    maybeInitTotalStudentPoints();
+    render();
+  });
   onValue(rewardsRef, snap => { rewards = snap.val() || {}; render(); });
   onValue(groupRewardsRef, snap => { groupRewards = snap.val() || {}; render(); });
   onValue(requestsRef, snap => { requests = snap.val() || {}; render(); });
@@ -156,17 +165,26 @@
     render();
   });
   onValue(pointsLogRef, snap => { pointsLog = snap.val() || {}; render(); });
-  onValue(settingsRef, snap => {
+  onValue(totalStudentPointsRef, snap => {
     const val = snap.val();
-    if (val) {
-      settings = val;
-      if (!settings.categories) settings.categories = defaultCategories;
-      if (settings.totalPointsOverride === undefined) settings.totalPointsOverride = null;
-    } else {
-      set(settingsRef, settings);
-    }
+    if (val) { totalStudentPoints = val; totalStudentPointsLoaded = true; }
+    else { totalStudentPointsLoaded = false; maybeInitTotalStudentPoints(); }
     render();
   });
+  onValue(settingsRef, snap => {
+    const val = snap.val();
+    if (val) { settings = val; if (!settings.categories) settings.categories = defaultCategories; }
+    else set(settingsRef, settings);
+    render();
+  });
+
+  function maybeInitTotalStudentPoints() {
+    if (!totalStudentPointsLoaded && studentsLoaded) {
+      const sum = Object.values(students).reduce((s, st) => s + (st.points || 0), 0);
+      set(totalStudentPointsRef, { total: sum });
+      totalStudentPointsLoaded = true;
+    }
+  }
 
   function esc(s) {
     const d = document.createElement("div");
@@ -187,10 +205,7 @@
   }
 
   function getTotalPoints() {
-    if (settings.totalPointsOverride !== null && settings.totalPointsOverride !== undefined) {
-      return settings.totalPointsOverride;
-    }
-    return Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
+    return totalStudentPoints.total || 0;
   }
 
   function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null }; render(); }
@@ -245,11 +260,16 @@ window.__app = {
       if (!name) return alert("Bitte einen Namen eingeben.");
       const newRef = push(studentsRef);
       set(newRef, { name, points });
+      update(totalStudentPointsRef, { total: (totalStudentPoints.total || 0) + points });
       document.getElementById("newStudentName").value = "";
       document.getElementById("newStudentPoints").value = "0";
     },
     deleteStudent(id) {
-      if (confirm("Diesen Schüler wirklich löschen?")) remove(ref(db, "students/" + id));
+      const s = students[id];
+      if (confirm("Diesen Schüler wirklich löschen?")) {
+        remove(ref(db, "students/" + id));
+        if (s) update(totalStudentPointsRef, { total: (totalStudentPoints.total || 0) - (s.points || 0) });
+      }
     },
     resetStudentPassword(id) {
       if (confirm("Passwort dieses Schülers wirklich zurücksetzen? Er muss danach ein neues festlegen.")) {
@@ -264,6 +284,7 @@ window.__app = {
       const amount = cat.points || 0;
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + amount });
       update(classPointsRef, { total: (classPoints.total || 0) + amount });
+      update(totalStudentPointsRef, { total: (totalStudentPoints.total || 0) + amount });
       const logRef = push(pointsLogRef);
       set(logRef, { studentId, studentName: s.name, category: cat.label, amount, timestamp: Date.now() });
     },
@@ -272,6 +293,7 @@ window.__app = {
       if (!s) return;
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + delta });
       update(classPointsRef, { total: (classPoints.total || 0) + delta });
+      update(totalStudentPointsRef, { total: (totalStudentPoints.total || 0) + delta });
       const logRef = push(pointsLogRef);
       set(logRef, { studentId, studentName: s.name, category: "Korrektur", amount: delta, timestamp: Date.now() });
     },
@@ -339,7 +361,10 @@ window.__app = {
       const r = requests[id];
       if (!r) return;
       const student = students[r.studentId];
-      if (student) update(ref(db, "students/" + r.studentId), { points: (student.points || 0) - r.cost });
+      if (student) {
+        update(ref(db, "students/" + r.studentId), { points: (student.points || 0) - r.cost });
+        update(totalStudentPointsRef, { total: (totalStudentPoints.total || 0) - r.cost });
+      }
       update(ref(db, "requests/" + id), { status: "approved" });
     },
     rejectRequest(id) {
@@ -357,9 +382,14 @@ window.__app = {
     savePointsManually() {
       const totalVal = parseInt(document.getElementById("manualTotalPoints").value || "0", 10);
       const classVal = parseInt(document.getElementById("manualClassPoints").value || "0", 10);
-      update(settingsRef, { totalPointsOverride: totalVal });
+      update(totalStudentPointsRef, { total: totalVal });
       update(classPointsRef, { total: classVal });
-      alert("Punktestände wurden gespeichert.");
+      alert("Punktestände wurden direkt in der Datenbank gespeichert.");
+    },
+    recalculateTotalPoints() {
+      const sum = Object.values(students).reduce((s, st) => s + (st.points || 0), 0);
+      update(totalStudentPointsRef, { total: sum });
+      alert("Summe aller Schülerpunkte wurde neu berechnet: " + sum);
     },
 
     resetAll() {
@@ -371,7 +401,7 @@ window.__app = {
       set(requestsRef, null);
       set(pointsLogRef, null);
       set(classPointsRef, { total: 0 });
-      update(settingsRef, { totalPointsOverride: null });
+      set(totalStudentPointsRef, { total: 0 });
       alert("Klassendaten wurden zurückgesetzt.");
     }
   };
@@ -687,11 +717,13 @@ function renderTeacherDashboard() {
         <div class="card"><h3>Punktekategorien anpassen</h3>${catRows}</div>
         <div class="card">
           <h3>Punktestände manuell anpassen</h3>
+          <p class="small">Diese Werte werden direkt in der Datenbank gespeichert und bei jeder weiteren Punktevergabe/Korrektur automatisch mitgeführt.</p>
           <label>Summe aller Schülerpunkte</label>
           <input id="manualTotalPoints" type="number" value="${totalPoints}" />
           <label>Gemeinsame Klassenpunkte</label>
           <input id="manualClassPoints" type="number" value="${classPoints.total || 0}" />
           <button class="btn" onclick="__app.savePointsManually()">Beide Werte speichern</button>
+          <button class="btn secondary" style="margin-top:8px;" onclick="__app.recalculateTotalPoints()">Summe aus Schülerpunkten neu berechnen</button>
         </div>
         <div class="card">
           <h3>Lehrkraft-Passwort ändern</h3>
@@ -821,3 +853,5 @@ function renderStudentDashboard() {
 </script>
 </body>
 </html>
+
+
