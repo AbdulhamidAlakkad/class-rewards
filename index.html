@@ -8,7 +8,8 @@
   :root {
     --teal: #0f9c95;
     --teal-dark: #0b7a75;
-    --bg: #f4faf9;
+    --orange: #ff9f5a;
+    --bg: #f1f8f7;
     --card: #ffffff;
     --text: #1f2937;
     --muted: #6b7280;
@@ -20,9 +21,20 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
-  header { background: var(--teal); color: white; padding: 16px 20px; text-align: center; font-size: 20px; font-weight: 600; }
+  header {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white;
+    padding: 24px 20px 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 14px rgba(15,156,149,0.25);
+  }
+  .header-subtitle { font-size: 14px; font-weight: 400; opacity: 0.9; margin-top: 4px; }
   #app { max-width: 480px; margin: 0 auto; padding: 16px; padding-bottom: 80px; }
-  .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 16px; box-shadow: 0 3px 10px rgba(15,23,42,0.08); }
+  .welcome-card { background: linear-gradient(135deg, #ffffff, #eaf7f6); border: 1px solid #d5efec; }
   .btn { display: inline-block; background: var(--teal); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-size: 15px; cursor: pointer; text-align: center; }
   .btn:hover { background: var(--teal-dark); }
   .btn.secondary { background: #e5e7eb; color: var(--text); }
@@ -63,11 +75,14 @@
   .bar-fill { background: var(--teal); height: 100%; border-radius: 8px; }
   .bar-value { width: 40px; text-align: right; font-size: 13px; font-weight: 600; }
   .progress-bar { background: #eee; border-radius: 8px; height: 16px; overflow: hidden; margin: 8px 0; }
-  .progress-fill { background: var(--teal); height: 100%; border-radius: 8px; }
+  .progress-fill { background: var(--orange); height: 100%; border-radius: 8px; }
 </style>
 </head>
 <body>
-<header>🏆 Klassen-Belohnungen</header>
+<header>
+  🏆 Klassen-Belohnungen
+  <div class="header-subtitle">Gemeinsam Punkte sammeln und Erfolge feiern</div>
+</header>
 <div id="app"></div>
 
 <script type="module">
@@ -106,7 +121,6 @@
   const classPointsRef = ref(db, "classPoints");
   const pointsLogRef = ref(db, "pointsLog");
 
-  // Icons liegen direkt hier im Code, nicht in der Datenbank
   const ICONS = {
     pen: "✏️", art: "🎨", pizza: "🍕", game: "🎮", movie: "🎬",
     chair: "🪑", book: "📚", gift: "🎁", star: "⭐", trophy: "🏆",
@@ -169,13 +183,7 @@
 
   function goHome() { state = { role: null, teacherTab: "students", studentId: null, studentTab: "points", authStep: null }; render(); }
 
-
-async function ensureStudentPassword(studentId) {
-    const s = students[studentId];
-    return s && s.password ? true : false;
-  }
-
-  window.__app = {
+window.__app = {
     chooseRole(role) { state.role = role; render(); },
     goHome,
     teacherLogin(pwInputId) {
@@ -345,7 +353,42 @@ async function ensureStudentPassword(studentId) {
     }
   };
 
-function render() {
+function renderPodiumAndBars() {
+    const sorted = Object.entries(students).sort((a, b) => (b[1].points || 0) - (a[1].points || 0));
+    const top3 = sorted.slice(0, 3);
+    const maxPoints = sorted.length ? (sorted[0][1].points || 0) : 1;
+    const medals = ["🥇", "🥈", "🥉"];
+    const podiumOrder = [top3[1], top3[0], top3[2]];
+
+    const podiumHtml = top3.length ? `
+      <div class="podium">
+        ${podiumOrder.map((entry) => {
+          if (!entry) return "";
+          const [id, s] = entry;
+          const rank = entry === top3[0] ? 1 : entry === top3[1] ? 2 : 3;
+          return `
+          <div class="podium-item podium-${rank}">
+            <div class="medal">${medals[rank - 1]}</div>
+            <div class="podium-name">${esc(s.name)}</div>
+            <div class="podium-points">${s.points || 0} Pkt.</div>
+          </div>`;
+        }).join("")}
+      </div>` : "";
+
+    const barsHtml = sorted.map(([id, s]) => {
+      const pct = maxPoints > 0 ? Math.round(((s.points || 0) / maxPoints) * 100) : 0;
+      return `
+      <div class="bar-row">
+        <div class="bar-label">${esc(s.name)}</div>
+        <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-value">${s.points || 0}</div>
+      </div>`;
+    }).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
+
+    return `<div class="card"><h3>Bestenliste</h3>${podiumHtml}${barsHtml}</div>`;
+  }
+
+  function render() {
     if (!state.role) return renderRoleSelect();
     if (state.role === "teacher-login") return renderTeacherLogin();
     if (state.role === "teacher-in") return renderTeacherDashboard();
@@ -355,9 +398,54 @@ function render() {
   }
 
   function renderRoleSelect() {
+    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
+    const studentCount = Object.keys(students).length;
+
+    const groupGoalsHtml = Object.entries(groupRewards).map(([id, r]) => {
+      const pct = Math.min(100, Math.round(((classPoints.total || 0) / r.points) * 100));
+      return `
+      <div style="margin-bottom:12px;">
+        <div class="top-bar" style="margin-bottom:6px;">
+          <div>${ICONS[r.icon] || "🎉"} ${esc(r.name)}</div>
+          <span class="pill">${classPoints.total || 0} / ${r.points} Pkt.</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join("") || `<p class="small">Die Lehrkraft hat noch kein Klassenziel festgelegt.</p>`;
+
     app_.innerHTML = `
+      <div class="card welcome-card center">
+        <div style="font-size:32px;">👋</div>
+        <h2 style="margin:6px 0 4px;">Willkommen bei den Klassen-Belohnungen!</h2>
+        <p class="small">Hier sehen Eltern und Schüler:innen jederzeit den aktuellen Punktestand und die Klassenziele, ganz ohne Anmeldung.</p>
+      </div>
+
+      <div class="card">
+        <div class="btn-row" style="justify-content:space-between;">
+          <div class="center" style="flex:1;">
+            <div style="font-size:26px;font-weight:800;color:var(--teal-dark)">${studentCount}</div>
+            <div class="small">Schüler:innen</div>
+          </div>
+          <div class="center" style="flex:1;">
+            <div style="font-size:26px;font-weight:800;color:var(--teal-dark)">${totalPoints}</div>
+            <div class="small">Punkte gesamt</div>
+          </div>
+          <div class="center" style="flex:1;">
+            <div style="font-size:26px;font-weight:800;color:var(--orange)">${classPoints.total || 0}</div>
+            <div class="small">Klassenpunkte</div>
+          </div>
+        </div>
+      </div>
+
+      ${renderPodiumAndBars()}
+
+      <div class="card">
+        <h3>Unsere Klassenziele</h3>
+        ${groupGoalsHtml}
+      </div>
+
       <div class="card center">
-        <p>Wer bist du?</p>
+        <p style="font-weight:600;">Wer bist du?</p>
         <div class="btn-row" style="justify-content:center;">
           <button class="btn" onclick="__app.chooseRole('teacher-login')">Ich bin Lehrkraft</button>
           <button class="btn secondary" onclick="__app.chooseRole('student-select')">Ich bin Schüler/in</button>
@@ -418,41 +506,6 @@ function render() {
           <p class="small">Passwort vergessen? Frag deine Lehrkraft, sie kann es zurücksetzen.</p>
         </div>`;
     }
-  }
-
-  function renderPodiumAndBars() {
-    const sorted = Object.entries(students).sort((a, b) => (b[1].points || 0) - (a[1].points || 0));
-    const top3 = sorted.slice(0, 3);
-    const maxPoints = sorted.length ? (sorted[0][1].points || 0) : 1;
-    const medals = ["🥇", "🥈", "🥉"];
-    const podiumOrder = [top3[1], top3[0], top3[2]];
-
-    const podiumHtml = top3.length ? `
-      <div class="podium">
-        ${podiumOrder.map((entry) => {
-          if (!entry) return "";
-          const [id, s] = entry;
-          const rank = entry === top3[0] ? 1 : entry === top3[1] ? 2 : 3;
-          return `
-          <div class="podium-item podium-${rank}">
-            <div class="medal">${medals[rank - 1]}</div>
-            <div class="podium-name">${esc(s.name)}</div>
-            <div class="podium-points">${s.points || 0} Pkt.</div>
-          </div>`;
-        }).join("")}
-      </div>` : "";
-
-    const barsHtml = sorted.map(([id, s]) => {
-      const pct = maxPoints > 0 ? Math.round(((s.points || 0) / maxPoints) * 100) : 0;
-      return `
-      <div class="bar-row">
-        <div class="bar-label">${esc(s.name)}</div>
-        <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="bar-value">${s.points || 0}</div>
-      </div>`;
-    }).join("") || `<p class="small">Noch keine Schüler angelegt.</p>`;
-
-    return `<div class="card"><h3>Bestenliste</h3>${podiumHtml}${barsHtml}</div>`;
   }
 
   function renderTeacherDashboard() {
