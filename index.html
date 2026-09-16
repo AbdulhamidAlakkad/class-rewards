@@ -6,11 +6,10 @@
 <title>Klassen-Belohnungen</title>
 <style>
   :root {
-    --teal: #10a99d;
+    --teal: #0f9c95;
     --teal-dark: #0b7a75;
-    --orange: #ff9248;
-    --orange-dark: #f07d2e;
-    --bg: #f2f9f8;
+    --orange: #ff9f5a;
+    --bg: #f1f8f7;
     --card: #ffffff;
     --text: #1f2937;
     --muted: #6b7280;
@@ -25,49 +24,34 @@
   header {
     background: linear-gradient(135deg, var(--teal), var(--teal-dark));
     color: white;
-    padding: 26px 20px 22px;
+    padding: 24px 20px 20px;
     text-align: center;
     font-size: 24px;
     font-weight: 700;
-    border-radius: 0 0 26px 26px;
-    box-shadow: 0 6px 18px rgba(11,122,117,0.3);
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 14px rgba(15,156,149,0.25);
   }
-  .header-subtitle { font-size: 14px; font-weight: 400; opacity: 0.92; margin-top: 4px; }
+  .header-subtitle { font-size: 14px; font-weight: 400; opacity: 0.9; margin-top: 4px; }
   #app { max-width: 480px; margin: 0 auto; padding: 16px; padding-bottom: 80px; }
-  .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 14px rgba(15,23,42,0.07); }
-  .welcome-card {
-    background: linear-gradient(135deg, #fff8ef, #eaf9f6);
-    border: 1px solid #d5efec;
-  }
-  .btn {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-    color: white;
-    border: none;
-    padding: 11px 18px;
-    border-radius: 12px;
-    font-size: 15px;
-    cursor: pointer;
-    text-align: center;
-    transition: transform 0.1s ease;
-  }
-  .btn:hover { filter: brightness(1.05); }
-  .btn:active { transform: scale(0.97); }
-  .btn.secondary { background: #eef2f1; color: var(--text); }
-  .btn.danger { background: linear-gradient(135deg, var(--danger), #c94040); }
+  .card { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 16px; box-shadow: 0 3px 10px rgba(15,23,42,0.08); }
+  .welcome-card { background: linear-gradient(135deg, #ffffff, #eaf7f6); border: 1px solid #d5efec; }
+  .btn { display: inline-block; background: var(--teal); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-size: 15px; cursor: pointer; text-align: center; }
+  .btn:hover { background: var(--teal-dark); }
+  .btn.secondary { background: #e5e7eb; color: var(--text); }
+  .btn.danger { background: var(--danger); }
   .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .small-btn { font-size: 12px; padding: 6px 10px; border-radius: 10px; }
-  input, textarea, select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d8dfe0; margin-top: 4px; margin-bottom: 10px; font-size: 15px; }
+  .small-btn { font-size: 12px; padding: 6px 8px; border-radius: 8px; }
+  input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-top: 4px; margin-bottom: 10px; font-size: 15px; }
   label { font-size: 13px; color: var(--muted); font-weight: 600; }
   .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-  .tab { flex: 1; text-align: center; padding: 10px; background: #e6f4f3; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--teal-dark); font-size: 13px; min-width: 70px; }
-  .tab.active { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: white; }
+  .tab { flex: 1; text-align: center; padding: 10px; background: #e6f4f3; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--teal-dark); font-size: 13px; min-width: 70px; }
+  .tab.active { background: var(--teal); color: white; }
   .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; gap: 8px; }
   .list-item:last-child { border-bottom: none; }
-  .pill { background: #e6f4f3; color: var(--teal-dark); padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
-  .reward-card, .group-reward-card { border: 1px solid #eee; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
-  .reward-icon { font-size: 42px; text-align: center; margin-bottom: 6px; }
+  .pill { background: #e6f4f3; color: var(--teal-dark); padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+  .reward-card, .group-reward-card { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .reward-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
   .reward-title { font-weight: 700; font-size: 16px; }
   .reward-desc { color: var(--muted); font-size: 14px; margin: 6px 0; }
   .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -76,22 +60,22 @@
   .status-pending { color: var(--warn); font-weight: 600; }
   .status-approved { color: var(--teal-dark); font-weight: 600; }
   .status-rejected { color: var(--danger); font-weight: 600; }
-  .setup-warning { background: #fff4e5; border: 1px solid #f0c36d; padding: 14px; border-radius: 12px; margin-bottom: 14px; }
+  .setup-warning { background: #fff4e5; border: 1px solid #f0c36d; padding: 14px; border-radius: 10px; margin-bottom: 14px; }
   .podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
-  .podium-item { text-align: center; background: #f7f7f7; border-radius: 14px; padding: 12px 8px; flex: 1; }
-  .podium-1 { order: 2; background: linear-gradient(135deg, #fff8e0, #fff3c4); border: 2px solid var(--gold); }
+  .podium-item { text-align: center; background: #f7f7f7; border-radius: 10px; padding: 10px 8px; flex: 1; }
+  .podium-1 { order: 2; background: #fff8e0; border: 2px solid var(--gold); }
   .podium-2 { order: 1; background: #f5f5f5; border: 2px solid var(--silver); }
   .podium-3 { order: 3; background: #fbeee0; border: 2px solid var(--bronze); }
-  .medal { font-size: 30px; }
+  .medal { font-size: 28px; }
   .podium-name { font-weight: 700; font-size: 13px; margin-top: 4px; }
   .podium-points { font-size: 12px; color: var(--muted); }
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .bar-label { width: 80px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bar-container { flex: 1; background: #eef2f1; border-radius: 10px; height: 14px; overflow: hidden; }
-  .bar-fill { background: linear-gradient(90deg, var(--teal), var(--teal-dark)); height: 100%; border-radius: 10px; }
+  .bar-container { flex: 1; background: #eee; border-radius: 8px; height: 14px; overflow: hidden; }
+  .bar-fill { background: var(--teal); height: 100%; border-radius: 8px; }
   .bar-value { width: 40px; text-align: right; font-size: 13px; font-weight: 600; }
-  .progress-bar { background: #eef2f1; border-radius: 10px; height: 16px; overflow: hidden; margin: 8px 0; }
-  .progress-fill { background: linear-gradient(90deg, var(--orange), var(--orange-dark)); height: 100%; border-radius: 10px; }
+  .progress-bar { background: #eee; border-radius: 8px; height: 16px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { background: var(--orange); height: 100%; border-radius: 8px; }
 </style>
 </head>
 <body>
@@ -156,7 +140,7 @@
   let rewards = {};
   let groupRewards = {};
   let requests = {};
-  let settings = { teacherPassword: "changeme", categories: defaultCategories };
+  let settings = { teacherPassword: "changeme", categories: defaultCategories, totalPointsOffset: 0 };
   let classPoints = { total: 0 };
   let pointsLog = {};
 
@@ -174,8 +158,13 @@
   onValue(pointsLogRef, snap => { pointsLog = snap.val() || {}; render(); });
   onValue(settingsRef, snap => {
     const val = snap.val();
-    if (val) { settings = val; if (!settings.categories) settings.categories = defaultCategories; }
-    else set(settingsRef, settings);
+    if (val) {
+      settings = val;
+      if (!settings.categories) settings.categories = defaultCategories;
+      if (settings.totalPointsOffset === undefined) settings.totalPointsOffset = 0;
+    } else {
+      set(settingsRef, settings);
+    }
     render();
   });
 
@@ -267,8 +256,7 @@ window.__app = {
       if (!s || !cat) return;
       const amount = cat.points || 0;
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + amount });
-      const newTotal = Math.max(0, (classPoints.total || 0) + amount);
-      update(classPointsRef, { total: newTotal });
+      update(classPointsRef, { total: (classPoints.total || 0) + amount });
       const logRef = push(pointsLogRef);
       set(logRef, { studentId, studentName: s.name, category: cat.label, amount, timestamp: Date.now() });
     },
@@ -276,8 +264,7 @@ window.__app = {
       const s = students[studentId];
       if (!s) return;
       update(ref(db, "students/" + studentId), { points: (s.points || 0) + delta });
-      const newTotal = Math.max(0, (classPoints.total || 0) + delta);
-      update(classPointsRef, { total: newTotal });
+      update(classPointsRef, { total: (classPoints.total || 0) + delta });
       const logRef = push(pointsLogRef);
       set(logRef, { studentId, studentName: s.name, category: "Korrektur", amount: delta, timestamp: Date.now() });
     },
@@ -324,7 +311,7 @@ window.__app = {
       if (!r) return;
       if ((classPoints.total || 0) < r.points) return alert("Die Klasse hat noch nicht genug Punkte.");
       if (!confirm(`"${r.name}" jetzt einlösen? Es werden ${r.points} Klassenpunkte abgezogen.`)) return;
-      update(classPointsRef, { total: Math.max(0, (classPoints.total || 0) - r.points) });
+      update(classPointsRef, { total: (classPoints.total || 0) - r.points });
       alert("Klassen-Belohnung eingelöst!");
     },
 
@@ -359,6 +346,18 @@ window.__app = {
       alert("Passwort geändert.");
       document.getElementById("newPassword").value = "";
     },
+
+    setClassPointsManually(inputId) {
+      const val = parseInt(document.getElementById(inputId).value || "0", 10);
+      update(classPointsRef, { total: val });
+      alert("Klassenpunkte wurden angepasst.");
+    },
+    setTotalPointsOffset(inputId) {
+      const val = parseInt(document.getElementById(inputId).value || "0", 10);
+      update(settingsRef, { totalPointsOffset: val });
+      alert("Korrekturwert für Gesamtpunkte wurde gespeichert.");
+    },
+
     resetAll() {
       if (!confirm("Wirklich ALLE Schüler, Belohnungen, Klassenpunkte und Anfragen löschen? Das kann nicht rückgängig gemacht werden.")) return;
       if (!confirm("Bist du dir wirklich sicher? Letzte Bestätigung.")) return;
@@ -417,7 +416,7 @@ function renderPodiumAndBars() {
   }
 
   function renderRoleSelect() {
-    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
+    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0) + (settings.totalPointsOffset || 0);
     const studentCount = Object.keys(students).length;
 
     const groupGoalsHtml = Object.entries(groupRewards).map(([id, r]) => {
@@ -436,6 +435,7 @@ function renderPodiumAndBars() {
       <div class="card welcome-card center">
         <div style="font-size:32px;">👋</div>
         <h2 style="margin:6px 0 4px;">Willkommen bei den Klassen-Belohnungen!</h2>
+        <p class="small">Hier sehen Eltern und Schüler:innen jederzeit den aktuellen Punktestand und die Klassenziele, ganz ohne Anmeldung.</p>
       </div>
 
       <div class="card">
@@ -449,7 +449,7 @@ function renderPodiumAndBars() {
             <div class="small">Punkte gesamt</div>
           </div>
           <div class="center" style="flex:1;">
-            <div style="font-size:26px;font-weight:800;color:var(--orange-dark)">${classPoints.total || 0}</div>
+            <div style="font-size:26px;font-weight:800;color:var(--orange)">${classPoints.total || 0}</div>
             <div class="small">Klassenpunkte</div>
           </div>
         </div>
@@ -526,9 +526,9 @@ function renderPodiumAndBars() {
     }
   }
 
-  function renderTeacherDashboard() {
+function renderTeacherDashboard() {
     const tab = state.teacherTab;
-    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0);
+    const totalPoints = Object.values(students).reduce((sum, s) => sum + (s.points || 0), 0) + (settings.totalPointsOffset || 0);
     app_.innerHTML = `
       <div class="top-bar">
         <strong>Lehrkraft-Bereich</strong>
@@ -539,7 +539,7 @@ function renderPodiumAndBars() {
         <div class="small">Summe aller Schülerpunkte</div>
       </div>
       <div class="card center">
-        <div style="font-size:28px;font-weight:800;color:var(--orange-dark)">${classPoints.total || 0}</div>
+        <div style="font-size:28px;font-weight:800;color:var(--teal-dark)">${classPoints.total || 0}</div>
         <div class="small">Gemeinsame Klassenpunkte</div>
       </div>
       <div class="tabs">
@@ -558,7 +558,7 @@ function renderPodiumAndBars() {
           <div class="top-bar">
             <div>
               <strong>${esc(s.name)}</strong>
-              <div class="small">${s.points || 0} Punkte · ${s.password ? "Passwort gesetzt" : "Kein Passwort"}</div>
+              <div class="small">${s.points || 0} Punkte ${s.password ? "· Passwort gesetzt" : "· Kein Passwort"}</div>
             </div>
             <button class="btn danger small-btn" onclick="__app.deleteStudent('${id}')">Löschen</button>
           </div>
@@ -681,6 +681,16 @@ function renderPodiumAndBars() {
       content.innerHTML = `
         <div class="card"><h3>Punktekategorien anpassen</h3>${catRows}</div>
         <div class="card">
+          <h3>Punktestände manuell anpassen</h3>
+          <label>Klassenpunkte (aktuell: ${classPoints.total || 0})</label>
+          <input id="manualClassPoints" type="number" value="${classPoints.total || 0}" />
+          <button class="btn secondary" onclick="__app.setClassPointsManually('manualClassPoints')">Klassenpunkte speichern</button>
+          <label style="margin-top:10px;display:block;">Korrekturwert für "Punkte gesamt" (aktuell: ${settings.totalPointsOffset || 0})</label>
+          <input id="manualTotalOffset" type="number" value="${settings.totalPointsOffset || 0}" />
+          <button class="btn secondary" onclick="__app.setTotalPointsOffset('manualTotalOffset')">Korrekturwert speichern</button>
+          <p class="small">Der Korrekturwert wird zur Summe aller Schülerpunkte addiert, falls diese Anzeige mal manuell angepasst werden muss.</p>
+        </div>
+        <div class="card">
           <h3>Lehrkraft-Passwort ändern</h3>
           <input id="newPassword" type="password" placeholder="Neues Passwort" />
           <button class="btn" onclick="__app.changePassword()">Passwort speichern</button>
@@ -694,30 +704,71 @@ function renderPodiumAndBars() {
   }
 
 function renderStudentDashboard() {
-    const s = students[state.studentId];
-    if (!s) { goHome(); return; }
-    const tab = state.studentTab || "shop";
+    const student = students[state.studentId];
+    if (!student) { goHome(); return; }
+    const tab = state.studentTab;
 
     app_.innerHTML = `
       <div class="top-bar">
-        <div>
-          <strong>${esc(s.name)}</strong>
-          <div class="small">${s.points || 0} Punkte</div>
-        </div>
+        <div><strong>${esc(student.name)}</strong><div class="small">${student.points || 0} Punkte</div></div>
         <button class="btn secondary" onclick="__app.goHome()">Abmelden</button>
       </div>
       <div class="tabs">
-        <div class="tab ${tab==='shop'?'active':''}" onclick="__app.setStudentTab('shop')">Geschenkeladen</div>
-        <div class="tab ${tab==='class'?'active':''}" onclick="__app.setStudentTab('class')">Klassenziele</div>
-        <div class="tab ${tab==='requests'?'active':''}" onclick="__app.setStudentTab('requests')">Meine Anfragen</div>
-        <div class="tab ${tab==='board'?'active':''}" onclick="__app.setStudentTab('board')">Bestenliste</div>
+        <div class="tab ${tab==='points'?'active':''}" onclick="__app.setStudentTab('points')">Punktestand</div>
+        <div class="tab ${tab==='history'?'active':''}" onclick="__app.setStudentTab('history')">Verlauf</div>
+        <div class="tab ${tab==='rewards'?'active':''}" onclick="__app.setStudentTab('rewards')">Geschenkeladen</div>
+        <div class="tab ${tab==='group'?'active':''}" onclick="__app.setStudentTab('group')">Klassenziele</div>
       </div>
       <div id="studentContent"></div>`;
+
     const content = document.getElementById("studentContent");
 
-    if (tab === "shop") {
-      const rows = Object.entries(rewards).map(([id, r]) => {
-        const enough = (s.points || 0) >= r.points;
+    if (tab === "points") {
+      const myRequests = Object.entries(requests)
+        .filter(([_, r]) => r.studentId === state.studentId)
+        .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
+      const reqRows = myRequests.map(([id, r]) => `
+        <div class="list-item">
+          <div>
+            <div>${esc(r.rewardName)} (${r.cost} Pkt.)</div>
+            <div class="small">${formatDate(r.timestamp)}</div>
+          </div>
+          <span class="small status-${r.status}">${r.status === 'pending' ? 'Offen' : r.status === 'approved' ? 'Bestätigt' : 'Abgelehnt'}</span>
+        </div>`).join("") || `<p class="small">Noch keine Anfragen.</p>`;
+
+      content.innerHTML = `
+        <div class="card center">
+          <div style="font-size:40px;font-weight:800;color:var(--teal-dark)">${student.points || 0}</div>
+          <div class="small">Meine Punkte</div>
+        </div>
+        <div class="card">
+          <h3>Meine Einlöse-Anfragen</h3>
+          ${reqRows}
+        </div>`;
+    }
+
+    if (tab === "history") {
+      const myLog = Object.entries(pointsLog)
+        .filter(([_, l]) => l.studentId === state.studentId)
+        .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
+      const logRows = myLog.map(([id, l]) => `
+        <div class="list-item">
+          <div>
+            <div><strong>${esc(l.category)}</strong> ${l.amount > 0 ? "+" : ""}${l.amount} Pkt.</div>
+            <div class="small">${formatDate(l.timestamp)}</div>
+          </div>
+        </div>`).join("") || `<p class="small">Noch keine Punkte-Historie vorhanden.</p>`;
+
+      content.innerHTML = `
+        <div class="card">
+          <h3>Woher kommen meine Punkte?</h3>
+          ${logRows}
+        </div>`;
+    }
+
+    if (tab === "rewards") {
+      const cards = Object.entries(rewards).map(([id, r]) => {
+        const enough = (student.points || 0) >= (r.points || 0);
         return `
         <div class="reward-card">
           <div class="reward-icon">${ICONS[r.icon] || "🎁"}</div>
@@ -726,16 +777,17 @@ function renderStudentDashboard() {
             <span class="pill">${r.points} Pkt.</span>
           </div>
           <div class="reward-desc">${esc(r.description || "")}</div>
-          <button class="btn" ${enough ? "" : "disabled"} onclick="__app.requestReward('${id}')">
-            ${enough ? "Einlösen anfragen" : "Noch nicht genug Punkte"}
+          <button class="btn" ${enough ? "" : "disabled"} onclick="__app.requestReward('${state.studentId}', '${id}')">
+            ${enough ? "Einlösen" : "Nicht genug Punkte"}
           </button>
         </div>`;
-      }).join("") || `<p class="small">Die Lehrkraft hat noch keine Belohnungen angelegt.</p>`;
-      content.innerHTML = `<div class="card"><h3>Geschenkeladen</h3>${rows}</div>`;
+      }).join("") || `<p class="small">Noch keine Belohnungen vorhanden.</p>`;
+
+      content.innerHTML = `<div class="card"><h3>Geschenkeladen</h3>${cards}</div>`;
     }
 
-    if (tab === "class") {
-      const rows = Object.entries(groupRewards).map(([id, r]) => {
+    if (tab === "group") {
+      const groupCards = Object.entries(groupRewards).map(([id, r]) => {
         const pct = Math.min(100, Math.round(((classPoints.total || 0) / r.points) * 100));
         return `
         <div class="group-reward-card">
@@ -748,338 +800,22 @@ function renderStudentDashboard() {
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div class="small">${classPoints.total || 0} / ${r.points} Punkten (${pct}%)</div>
         </div>`;
-      }).join("") || `<p class="small">Die Lehrkraft hat noch kein Klassenziel festgelegt.</p>`;
+      }).join("") || `<p class="small">Noch keine Klassenziele vorhanden.</p>`;
+
       content.innerHTML = `
         <div class="card center">
-          <div style="font-size:28px;font-weight:800;color:var(--orange-dark)">${classPoints.total || 0}</div>
+          <div style="font-size:28px;font-weight:800;color:var(--teal-dark)">${classPoints.total || 0}</div>
           <div class="small">Gemeinsame Klassenpunkte</div>
         </div>
-        ${rows}`;
-    }
-
-    if (tab === "requests") {
-      const mine = Object.entries(requests)
-        .filter(([id, r]) => r.studentId === state.studentId)
-        .sort((a,b) => (b[1].timestamp||0)-(a[1].timestamp||0));
-      const rows = mine.map(([id, r]) => `
-        <div class="list-item">
-          <div>
-            <div><strong>${esc(r.rewardName)}</strong> (${r.cost} Pkt.)</div>
-            <div class="small status-${r.status}">${r.status === 'pending' ? 'Warte auf Bestätigung' : r.status === 'approved' ? 'Bestätigt 🎉' : 'Abgelehnt'}</div>
-            <div class="small">${formatDate(r.timestamp)}</div>
-          </div>
-        </div>`).join("") || `<p class="small">Du hast noch keine Belohnung angefragt.</p>`;
-      content.innerHTML = `<div class="card"><h3>Meine Anfragen</h3>${rows}</div>`;
-    }
-
-    if (tab === "board") {
-      content.innerHTML = renderPodiumAndBars();
+        <div class="card">
+          <h3>Ziele für die ganze Klasse</h3>
+          ${groupCards}
+        </div>`;
     }
   }
 
-  // ---------- Aktionen: Navigation ----------
-
-  function goHome() {
-    state.role = null;
-    state.studentId = null;
-    state.authStep = null;
-    render();
-  }
-
-  function chooseRole(role) {
-    state.role = role;
-    render();
-  }
-
-  function setTeacherTab(tab) {
-    state.teacherTab = tab;
-    render();
-  }
-
-  function setStudentTab(tab) {
-    state.studentTab = tab;
-    render();
-  }
-
-  function selectStudent(id) {
-    state.studentId = id;
-    const s = students[id];
-    state.authStep = s && s.password ? "login" : "setup";
-    state.role = "student-auth";
-    render();
-  }
-
-  // ---------- Aktionen: Lehrkraft-Login ----------
-
-  function teacherLogin(inputId) {
-    const val = (document.getElementById(inputId) || {}).value || "";
-    if (val === (settings.teacherPassword || "changeme")) {
-      state.role = "teacher-in";
-      state.teacherTab = "students";
-      render();
-    } else {
-      alert("Falsches Passwort.");
-    }
-  }
-
-  function changePassword() {
-    const val = (document.getElementById("newPassword") || {}).value || "";
-    if (val.length < 4) { alert("Mindestens 4 Zeichen."); return; }
-    settings.teacherPassword = val;
-    save();
-    alert("Passwort geändert.");
-    render();
-  }
-
-  // ---------- Aktionen: Schüler-Login ----------
-
-  function studentSetupPassword() {
-    const p1 = (document.getElementById("setupPw1") || {}).value || "";
-    const p2 = (document.getElementById("setupPw2") || {}).value || "";
-    if (p1.length < 4) { alert("Passwort muss mindestens 4 Zeichen haben."); return; }
-    if (p1 !== p2) { alert("Passwörter stimmen nicht überein."); return; }
-    students[state.studentId].password = p1;
-    save();
-    state.role = "student-in";
-    state.studentTab = "shop";
-    render();
-  }
-
-  function studentLogin() {
-    const val = (document.getElementById("loginPw") || {}).value || "";
-    const s = students[state.studentId];
-    if (s && val === s.password) {
-      state.role = "student-in";
-      state.studentTab = "shop";
-      render();
-    } else {
-      alert("Falsches Passwort.");
-    }
-  }
-
-  // ---------- Aktionen: Schüler-Verwaltung ----------
-
-  function addStudent() {
-    const name = (document.getElementById("newStudentName") || {}).value.trim();
-    const points = parseInt((document.getElementById("newStudentPoints") || {}).value, 10) || 0;
-    if (!name) { alert("Bitte einen Namen eingeben."); return; }
-    const id = "s_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    students[id] = { name, points, password: "" };
-    save();
-    render();
-  }
-
-  function deleteStudent(id) {
-    if (!confirm("Diesen Schüler wirklich löschen?")) return;
-    delete students[id];
-    save();
-    render();
-  }
-
-  function resetStudentPassword(id) {
-    if (!confirm("Passwort für diesen Schüler zurücksetzen?")) return;
-    students[id].password = "";
-    save();
-    render();
-  }
-
-  function awardPoints(id, categoryKey) {
-    const categories = settings.categories || defaultCategories;
-    const cat = categories[categoryKey];
-    if (!cat || !students[id]) return;
-    students[id].points = (students[id].points || 0) + cat.points;
-    save();
-    render();
-  }
-
-  function correctPoints(id, delta) {
-    if (!students[id]) return;
-    students[id].points = Math.max(0, (students[id].points || 0) + delta);
-    save();
-    render();
-  }
-
-  function updateCategoryValue(key, inputId) {
-    const val = parseInt((document.getElementById(inputId) || {}).value, 10);
-    if (isNaN(val)) { alert("Bitte eine Zahl eingeben."); return; }
-    if (!settings.categories) settings.categories = JSON.parse(JSON.stringify(defaultCategories));
-    if (!settings.categories[key]) settings.categories[key] = { label: key, points: 0 };
-    settings.categories[key].points = val;
-    save();
-    alert("Gespeichert.");
-    render();
-  }
-
-  // ---------- Aktionen: Belohnungen ----------
-
-  function addReward() {
-    const name = (document.getElementById("newRewardName") || {}).value.trim();
-    const points = parseInt((document.getElementById("newRewardPoints") || {}).value, 10) || 0;
-    const description = (document.getElementById("newRewardDesc") || {}).value.trim();
-    const icon = (document.getElementById("newRewardIcon") || {}).value || "gift";
-    if (!name || points <= 0) { alert("Bitte Name und gültige Punktzahl angeben."); return; }
-    const id = "r_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    rewards[id] = { name, points, description, icon };
-    save();
-    render();
-  }
-
-  function deleteReward(id) {
-    if (!confirm("Diese Belohnung wirklich löschen?")) return;
-    delete rewards[id];
-    save();
-    render();
-  }
-
-  function addGroupReward() {
-    const name = (document.getElementById("newGroupRewardName") || {}).value.trim();
-    const points = parseInt((document.getElementById("newGroupRewardPoints") || {}).value, 10) || 0;
-    const description = (document.getElementById("newGroupRewardDesc") || {}).value.trim();
-    const icon = (document.getElementById("newGroupRewardIcon") || {}).value || "movie";
-    if (!name || points <= 0) { alert("Bitte Name und gültige Punktzahl angeben."); return; }
-    const id = "g_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    groupRewards[id] = { name, points, description, icon };
-    save();
-    render();
-  }
-
-  function deleteGroupReward(id) {
-    if (!confirm("Diese Klassen-Belohnung wirklich löschen?")) return;
-    delete groupRewards[id];
-    save();
-    render();
-  }
-
-  function redeemGroupReward(id) {
-    const r = groupRewards[id];
-    if (!r) return;
-    if ((classPoints.total || 0) < r.points) { alert("Noch nicht genug Klassenpunkte."); return; }
-    if (!confirm(`"${r.name}" jetzt einlösen? Die Klassenpunkte werden dabei um ${r.points} reduziert.`)) return;
-    classPoints.total = (classPoints.total || 0) - r.points;
-    save();
-    alert("Belohnung eingelöst! Viel Spaß der Klasse.");
-    render();
-  }
-
-  // ---------- Aktionen: Einlöse-Anfragen ----------
-
-  function requestReward(rewardId) {
-    const s = students[state.studentId];
-    const r = rewards[rewardId];
-    if (!s || !r) return;
-    if ((s.points || 0) < r.points) { alert("Nicht genug Punkte."); return; }
-    const id = "req_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    requests[id] = {
-      studentId: state.studentId,
-      studentName: s.name,
-      rewardId,
-      rewardName: r.name,
-      cost: r.points,
-      status: "pending",
-      timestamp: Date.now()
-    };
-    save();
-    alert("Anfrage wurde an die Lehrkraft geschickt!");
-    state.studentTab = "requests";
-    render();
-  }
-
-  function approveRequest(id) {
-    const r = requests[id];
-    if (!r) return;
-    const s = students[r.studentId];
-    if (!s) return;
-    if ((s.points || 0) < r.cost) {
-      alert("Achtung: Der Schüler hat aktuell nicht mehr genug Punkte. Anfrage wird trotzdem bestätigt.");
-    }
-    s.points = Math.max(0, (s.points || 0) - r.cost);
-    r.status = "approved";
-    classPoints.total = (classPoints.total || 0) + 1;
-    save();
-    render();
-  }
-
-  function rejectRequest(id) {
-    const r = requests[id];
-    if (!r) return;
-    r.status = "rejected";
-    save();
-    render();
-  }
-
-  // ---------- Aktionen: Zurücksetzen ----------
-
-  function resetAll() {
-    if (!confirm("Wirklich ALLE Klassendaten löschen? Dies kann nicht rückgängig gemacht werden.")) return;
-    if (!confirm("Bist du absolut sicher? Alle Schüler, Punkte und Belohnungen gehen verloren.")) return;
-    students = {};
-    rewards = {};
-    groupRewards = {};
-    classPoints = { total: 0 };
-    requests = {};
-    settings.categories = JSON.parse(JSON.stringify(defaultCategories));
-    save();
-    goHome();
-  }
-
-  // ---------- Persistenz ----------
-
-  function save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        students, rewards, groupRewards, classPoints, requests, settings
-      }));
-    } catch (e) {
-      console.error("Speichern fehlgeschlagen:", e);
-    }
-  }
-
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        students = data.students || {};
-        rewards = data.rewards || {};
-        groupRewards = data.groupRewards || {};
-        classPoints = data.classPoints || { total: 0 };
-        requests = data.requests || {};
-        settings = data.settings || { teacherPassword: "changeme", categories: JSON.parse(JSON.stringify(defaultCategories)) };
-      }
-    } catch (e) {
-      console.error("Laden fehlgeschlagen:", e);
-    }
-  }
-
-  // ---------- Öffentliche API & Start ----------
-
-  window.__app = {
-    chooseRole,
-    goHome,
-    setTeacherTab,
-    setStudentTab,
-    selectStudent,
-    teacherLogin,
-    changePassword,
-    studentSetupPassword,
-    studentLogin,
-    addStudent,
-    deleteStudent,
-    resetStudentPassword,
-    awardPoints,
-    correctPoints,
-    updateCategoryValue,
-    addReward,
-    deleteReward,
-    addGroupReward,
-    deleteGroupReward,
-    redeemGroupReward,
-    requestReward,
-    approveRequest,
-    rejectRequest,
-    resetAll
-  };
-
-  load();
   render();
-})();
+</script>
+</body>
+</html>
+
